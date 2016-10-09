@@ -5,11 +5,12 @@ import numpy as np
 import scipy as sp
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use("TkAgg")
+#matplotlib.use("TkAgg")
 import pandas as pd
 import RPi.GPIO as GPIO
 from picamera import PiCamera
 from time import sleep
+import time
 from sqlalchemy import create_engine
 
 # ideas: resize image to something much smaller, with the same height/width ratio as either Pi camera
@@ -79,7 +80,7 @@ def find_pix(input_image):
 		# dimensions should match ratio of 8.5" x 11" paper
 		# 352 x 272 
 		image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-		image = cv2.resize(image, (100, 77))
+		image = cv2.resize(image, (352, 272))
 		# image for plot_points() function; allows us to plot over original image
 		plot_image = image
 		cv2.imwrite('plot_image.jpg', plot_image)
@@ -156,7 +157,7 @@ def follow_pix(k, l):
 	pix_list.append(current_pix)
 	print
 	print
-	print "current_pix = ", current_pix
+	#print "current_pix = ", current_pix
 	print
 	print
 
@@ -171,7 +172,7 @@ def pix_to_ik(px, py, pen_state):
 
 	# 1280 is width of image from pi cam, 232.72 is 2 inches (for offset) 
 	#  after multiplying by scalar
-	cx = ((px * 11.0) / width) + 2.0
+	cx = ((px * 11.0) / width) + 4.50
 	# 1024 is height of image from pi cam, -py is to flip axis to Cartesian	
         cy = ((-py * 8.5) / height) + 8.5
 	cartesian = [cx, cy]
@@ -188,7 +189,7 @@ def pix_to_ik(px, py, pen_state):
 	# -90 <= theta_one <= +90 
 	if (theta_two < 0.0):
 		theta_two += math.pi
-	elif (theta_two > 180.0):
+	elif (theta_two > math.pi):
 		theta_two -= math.pi
 
 	k1 = a1 + a2 * math.cos(theta_two)
@@ -202,7 +203,8 @@ def pix_to_ik(px, py, pen_state):
 		theta_three = 0.0
 
 	theta_one = round(math.degrees(theta_one))  # convert from rad to deg
-	theta_one += 90.0                           # add +90 so we can stick with uint's
+	theta_one += 60.0                           # add +90 so we can 
+stick with uint's
 	theta_two = round(math.degrees(theta_two))  # convert from rad to deg
 	angles = [theta_one, theta_two, theta_three]
 	angle_array.append(angles)	
@@ -258,8 +260,14 @@ def plot_points():
 
 # take_image()
 
-# find_pix('mountain_river.jpg')
-find_pix('twocircles.jpg')
+find_pix('mountain_river.jpg')
+start_time = time.time()
+#find_pix('twocircles.jpg')
+exec_time = time.time() - start_time
+m, s = divmod(exec_time, 60)
+h, m = divmod(m, 60)
+print("Executed in %d:%02d:%02d" % (h, m, s))
+sleep(5)
 # find_pix('lana_bw.jpg')
 
 print "algorithm has ran its course"
@@ -276,7 +284,7 @@ print
 
 print "begin plotting what the robot is drawing"
 print
-plot_points()
+#plot_points()
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

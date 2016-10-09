@@ -1,0 +1,11 @@
+Order of execution
+
+1. Run camera.py with python2 in order to generate the IK and dump it to a SQL table
+2. Execute the sql binary with `sudo ./sql`
+	This will wait for an Enter keypress, don't press it yet
+	We setup SPI pins but do not begin sending data yet
+3. Load the program onto the DragonBoard and execute it
+	DragonBoard is now waiting for first SPI communication
+4. Hit enter in the terminal with the running sql binary to begin sending SPI data
+	Terminal from step 2
+5. Watch in amazement as the robot works (I hope)
