@@ -73,8 +73,9 @@ def process_image(process_input):
 		print
 		# dimensions should match ratio of 8.5" x 11" paper
 		# 352 x 272 
-		image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+		# image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 		image = cv2.resize(image, (352, 272))
+		image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 		# image for plot_points() function; allows us to plot over original image
 		plot_image = image
 		cv2.imwrite('plot_image.jpg', plot_image)
@@ -134,6 +135,17 @@ def find_pix(input_image):
 	print
 
         image = input_image
+
+	first_corner = [0, 0, False]
+	second_corner = [352, 0, False]
+	third_corner = [352, 272, False]
+	fourth_corner = [0, 272, False]
+	
+	pix_list.append(first_corner)
+	pix_list.append(second_corner)
+	pix_list.append(third_corner)
+	pix_list.append(fourth_corner)
+	pix_list.append(first_corner)
 
 	for i in range(1, height):
 		for j in range(1, width):
@@ -207,10 +219,9 @@ def pix_to_ik(px, py, pen_state):
 
 	global angle_array
 	global angles_df
-	global pix_list_df
 
         # x_offset was 2.0 before shifting the drawing surface over to
-        # accomodate extending a2 (to allow for theta_three = 60.0)
+        # accomodate extending a2 (to allow for theta_three = 65.0)
         # all units of measurement for distance should be in inches
         x_offset = 4.5
         y_offset = 8.5
@@ -252,7 +263,7 @@ def pix_to_ik(px, py, pen_state):
 	gamma = math.atan2(k2, k1)
 	theta_one = math.atan2(cy, cx) - gamma
 
-        # when the pen is down, theta_three is at 60 degrees
+        # when the pen is down, theta_three is at 65 degrees
 	if (pen_state == True):
 		theta_three = 65.0
 	elif (pen_state == False):
@@ -302,7 +313,7 @@ def plot_points():
 
 	image_2 = plt.imread('plot_image.jpg')
 	image_plot = plt.imshow(image_2, cmap = 'gray')
-	
+
 	for r in range(1, len(pix_list)-1, 2):
 		count += 1
 		r_float = float(r) # this necessary so progress != 0.0 every time
@@ -315,7 +326,7 @@ def plot_points():
 			print "\rprogress: ", progress, "%"
 			print
 
-		if (theta_three == math.radians(65.0)):
+		if theta_three == math.radians(65.0):
 			print "\rpen_down = true"
 			line_color = 'r'
 			alpha_val = 1.0
