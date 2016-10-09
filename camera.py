@@ -5,19 +5,12 @@ import numpy as np
 import scipy as sp
 import matplotlib
 import matplotlib.pyplot as plt
-#matplotlib.use("TkAgg")
+matplotlib.use("TkAgg")
 import pandas as pd
 import RPi.GPIO as GPIO
 from picamera import PiCamera
 from time import sleep
-import time
 from sqlalchemy import create_engine
-
-# ideas: resize image to something much smaller, with the same height/width ratio as either Pi camera
-# or the paper (8.5" x 11")
-# if we use a much smaller image, we will have less pixels and therefore less data, and the entire
-# process will take a shorter amount of time
-
 
 # global variables
 image = 0
@@ -33,6 +26,8 @@ width = 0
 
 # universal setup for GPIO pin numbering
 GPIO.setmode(GPIO.BCM)
+
+
 
 
 def take_image():
@@ -52,24 +47,23 @@ def take_image():
 	image_captured = cv2.cvtColor(image_captured, cv2.COLOR_RGB2GRAY)
 	height_captured, width_captured = image_captured.shape
 	cv2.imwrite('image_captured.jpg', image_captured)
-	find_pix('image_captured.jpg')
+	process_image('image_captured.jpg')
 
-def find_pix(input_image):
 
-	# check if first time through to process image once, otherwise skip this step
+
+
+def process_image(process_input):
+
 	global image
-	global pix_list
-	global pen_down
 	global image_processed
-	global current_pix
 	global height, width
 	global plot_image
 
+	# check if first time through process_image, otherwise skip this step
 	if image_processed == False:
 		# image = saved image that we want processed/drawn
 		# if you want to draw a test picture, simply replace following line with "image = 'name_of_test_image.jpg'"
-		image = input_image
-		image = cv2.imread(image)
+		image = cv2.imread(process_input)
 		print 
 		print "image has been read"
 		print
@@ -84,17 +78,62 @@ def find_pix(input_image):
 		# image for plot_points() function; allows us to plot over original image
 		plot_image = image
 		cv2.imwrite('plot_image.jpg', plot_image)
-		cv2.imshow('Saved Original', image)
-		image = cv2.Canny(image, 150, 175)
-		cv2.imshow('Saved Edges', image)
-	        height, width = image.shape
+		# cv2.imshow('Saved Original', image)
+		print "Move the trackbar to adjust the number of edges"
+                print "More edges means more detail, but a longer drawing time"
+                print "Once the image with edges is ready, hit ESC"
+		
+                def nothing(x):
+                        pass
+
+                cv2.namedWindow('canny')
+                
+                cv2.createTrackbar('lower', 'canny', 0, 255, nothing)
+                cv2.createTrackbar('upper', 'canny', 0, 255, nothing)
+                
+                while(1):
+                        lower = cv2.getTrackbarPos('lower', 'canny')
+                        upper = cv2.getTrackbarPos('upper', 'canny')
+                        
+                        edges = cv2.Canny(image, lower, upper)
+                
+                        # cv2.imshow('original', img)
+                        cv2.imshow('canny', edges)
+                        montage = np.concatenate((edges, image), axis = 1)
+                        cv2. imshow('Canny Edge Detection vs. Original Image', montage)
+
+                        k = cv2.waitKey(1) & 0xFF
+                        
+                        if k == 27:
+                                break
+
+                cv2.destroyAllWindows()		
+		# cv2.imshow('Saved Edges', edges)
+	        height, width = edges.shape
 		print "resized image height = ", height
        		print "resized image width = ", width
 		print
-		image_processed = True	
+
+		image_processed = True
+                find_pix(edges)
+	
+
+
+
+
+def find_pix(input_image):
+
+	global image
+	global pix_list
+	global pen_down
+	global current_pix
+	global height, width
+	global plot_image
 
 	print "beginning to look for first white pixel"
 	print
+
+        image = input_image
 
 	for i in range(1, height):
 		for j in range(1, width):
@@ -131,6 +170,7 @@ def find_pix(input_image):
 	
 
 
+
 def follow_pix(k, l):
 
 	# (n, o) first time through is the current pixel location (first pixel in line)
@@ -157,9 +197,8 @@ def follow_pix(k, l):
 	pix_list.append(current_pix)
 	print
 	print
-	#print "current_pix = ", current_pix
-	print
-	print
+
+
 
 
 #  function to convert a pixel coordinate into angles for the servos
@@ -170,11 +209,17 @@ def pix_to_ik(px, py, pen_state):
 	global angles_df
 	global pix_list_df
 
+        # x_offset was 2.0 before shifting the drawing surface over to
+        # accomodate extending a2 (to allow for theta_three = 60.0)
+        # all units of measurement for distance should be in inches
+        x_offset = 4.5
+        y_offset = 8.5
+        
 	# 1280 is width of image from pi cam, 232.72 is 2 inches (for offset) 
 	#  after multiplying by scalar
-	cx = ((px * 11.0) / width) + 4.50
+	cx = ((px * 11.0) / width) + x_offset
 	# 1024 is height of image from pi cam, -py is to flip axis to Cartesian	
-        cy = ((-py * 8.5) / height) + 8.5
+        cy = ((-py * 8.5) / height) + y_offset
 	cartesian = [cx, cy]
 	# print "cartesian coords = ", cartesian
 	
@@ -182,8 +227,17 @@ def pix_to_ik(px, py, pen_state):
 	a2 = 236.0  # measurement in mm for link 2
 	a1 = a1 / 25.4  # convert to inches
 	a2 = a2 / 25.4  # convert to inches
-	alpha = (math.pow(cx, 2) + math.pow(cy, 2) - math.pow(a1, 2) - math.pow(a2, 2)) / (2 * a1 * a2)
-	theta_two = math.atan2(math.sqrt(1 - math.pow(alpha, 2)), alpha)
+	alpha = (math.pow(cx, 2.0) + math.pow(cy, 2.0) - math.pow(a1, 2.0) - math.pow(a2, 2.0)) / (2.0 * a1 * a2)
+
+        # need to check so atan2 for theta_two stays within bounds; if not, set theta_two = 0
+	if ((math.pow(alpha, 2)) > 1.0):
+                print "pix_to_ik value out of bounds"
+                print "(cx, cy) = ", cartesian
+                print "setting theta_two to 0.0 degrees"
+                print
+                theta_two = 0.0
+        else:
+                theta_two = math.atan2(math.sqrt(1.0 - math.pow(alpha, 2.0)), alpha)
 	
 	#  0 <= theta_two <= +180
 	# -90 <= theta_one <= +90 
@@ -192,25 +246,47 @@ def pix_to_ik(px, py, pen_state):
 	elif (theta_two > math.pi):
 		theta_two -= math.pi
 
+        # use k1, k2, and gamma to avoid the use of acos()
 	k1 = a1 + a2 * math.cos(theta_two)
 	k2 = a2 * math.sin(theta_two)
 	gamma = math.atan2(k2, k1)
 	theta_one = math.atan2(cy, cx) - gamma
-	
+
+        # when the pen is down, theta_three is at 60 degrees
 	if (pen_state == True):
-		theta_three = 60.0
+		theta_three = 65.0
 	elif (pen_state == False):
 		theta_three = 0.0
 
 	theta_one = round(math.degrees(theta_one))  # convert from rad to deg
-	theta_one += 60.0                           # add +90 so we can 
-stick with uint's
+	theta_one += 90.0                           # add +90 so we can stick with pos. integers
 	theta_two = round(math.degrees(theta_two))  # convert from rad to deg
+	
 	angles = [theta_one, theta_two, theta_three]
 	angle_array.append(angles)	
 	angles_df = pd.DataFrame(angle_array, columns = ['THETA1', 'THETA2', 'THETA3'])
 	
 	return angles_df
+
+
+
+
+
+##def trim_fat():
+##
+##        global angles_df
+##        global angle_array_plot
+##
+##        angle_array_plot = angle_array
+##
+##        for s in range(1, len(angle_array)-1):
+##                if ((angle_array[s][2] == 0.0) and (angle_array[s-1][2] == 0.0) and (angle_array[s+1][2] == 0.0)):                 
+##                        del angle_array[s]
+##
+##        print 
+##	angles_df = pd.DataFrame(angle_array, columns = ['THETA1', 'THETA2', 'THETA3'])
+##	return angles_df
+
 
 
 
@@ -239,7 +315,7 @@ def plot_points():
 			print "\rprogress: ", progress, "%"
 			print
 
-		if theta_three == (math.pi / 3):
+		if (theta_three == math.radians(65.0)):
 			print "\rpen_down = true"
 			line_color = 'r'
 			alpha_val = 1.0
@@ -259,32 +335,25 @@ def plot_points():
 
 
 # take_image()
-
-find_pix('mountain_river.jpg')
-start_time = time.time()
-#find_pix('twocircles.jpg')
-exec_time = time.time() - start_time
-m, s = divmod(exec_time, 60)
-h, m = divmod(m, 60)
-print("Executed in %d:%02d:%02d" % (h, m, s))
-sleep(5)
+# find_pix('mountain_river.jpg')
 # find_pix('lana_bw.jpg')
+
+process_image('lana_bw.jpg')
 
 print "algorithm has ran its course"
 print
 
 print "now creating sql table"
+print
 connection = create_engine('mysql+mysqlconnector://root:passwd@localhost:3306/ECE_439')
 angles_df.to_sql(name = 'ANGLES', con = connection, if_exists = 'replace', index_label = 'ID')
 
-print
-print
 print "angles_df = ", angles_df
 print
 
 print "begin plotting what the robot is drawing"
 print
-#plot_points()
+# plot_points()
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

@@ -10,7 +10,7 @@ void pwm_write_2(uchar);
 char seg_7(char);
 void MSDelay(char);
 uchar seg_7_val = 0;
-uchar theta = 0;
+uchar theta = 1;
  
 
 int buffer[6]= {90,180,0,45,30,60}; //100 byte buffer for values from raspi
@@ -29,7 +29,7 @@ void main(void)
     pwm_init_16();
     pwm_write_0(90);
     pwm_write_1(90);
-    pwm_write_2(90);
+    pwm_write_2(0);
     
     spi_enable();
 
@@ -78,6 +78,8 @@ void interrupt 13 timer_5_isr(void)
 void interrupt 19 spi0_isr(void)
 {
     uchar data, spi_reg;
+    DisableInterrupts;
+    
     spi_reg = SPI0SR;
     data = SPI0DR;
     
@@ -90,6 +92,11 @@ void interrupt 19 spi0_isr(void)
             pwm_write_1(data);
             break;
         case 2:
+            while (data != 0 && data != 65) 
+            {
+                while (~PTS_PTS7);   
+                data = SPI0DR;     
+            }
             pwm_write_2(data);
             break;
     }
@@ -101,8 +108,8 @@ void interrupt 19 spi0_isr(void)
     {
         theta = 0;
     }
-    SPI0DR = 0x00;
-    seg_7_val = data;    
+    
+    EnableInterrupts;
 }
 
 void pwm_init_16(void) {
@@ -172,8 +179,8 @@ void spi_enable(void)
     SPI0CR1 = 0xC0;
     SPI0CR2 = 0x00;
     DDRS = 0x10;
-    /*while (~ SPI0SR & 0x80);
-    dummy_val = SPI0DR;*/
+    while (~ SPI0SR & 0x80);
+    dummy_val = SPI0DR;
 }
 
 char seg_7(char val) 
