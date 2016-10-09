@@ -137,15 +137,15 @@ def find_pix(input_image):
         image = input_image
 
 	first_corner = [0, 0, False]
-	second_corner = [352, 0, False]
-	third_corner = [352, 272, False]
-	fourth_corner = [0, 272, False]
+	second_corner = [0, 352, False]
+	third_corner = [272, 352, False]
+	fourth_corner = [272, 0, False]
 	
-	pix_list.append(first_corner)
-	pix_list.append(second_corner)
-	pix_list.append(third_corner)
-	pix_list.append(fourth_corner)
-	pix_list.append(first_corner)
+	# pix_list.append(first_corner)
+	# pix_list.append(second_corner)
+	# pix_list.append(third_corner)
+	# pix_list.append(fourth_corner)
+	# pix_list.append(first_corner)
 
 	for i in range(1, height):
 		for j in range(1, width):
@@ -349,7 +349,7 @@ def plot_points():
 # find_pix('mountain_river.jpg')
 # find_pix('lana_bw.jpg')
 
-process_image('lana_bw.jpg')
+process_image('Walter2.jpg')
 
 print "algorithm has ran its course"
 print

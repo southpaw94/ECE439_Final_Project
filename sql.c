@@ -17,6 +17,7 @@ void finish_with_error(MYSQL *con)
 int main(int argc, char **argv)
 {
 	int i;
+	long delay;
 	unsigned long iter = 0;
     if (!bcm2835_init())
     {
@@ -66,15 +67,20 @@ int main(int argc, char **argv)
 
 	while ((row = mysql_fetch_row(result))) {
 		iter++;
+		if (iter < 5) {
+			delay = 50000;
+		} else {
+			delay = 50000;
+		}
 		printf("Sending packet %i\n", iter);
 		for (i = 1; i < num_fields; i++) {
 			unsigned char send_data = (unsigned char) atoi(row[i]);
    			uint8_t read_data = bcm2835_spi_transfer((unsigned char) send_data);
    			printf("Sent to SPI: %u\n", send_data);
-			usleep(2000);
+			usleep(10000);
 			/* printf("%s ", row[i]); */
 		}
-		usleep(10000);
+		usleep(delay);
 		printf("\n");
 	}
 
