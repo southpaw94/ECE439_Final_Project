@@ -12,19 +12,34 @@
 // gcc -o spi -I ../../src ../../src/bcm2835.c spi.c
 // sudo ./spi
 //
-// Author: Mike McCauley
+// Author: Mike McCauley (with small revisions by Michael Estes)
 // Copyright (C) 2012 Mike McCauley
 // $Id: RF22.h,v 1.21 2012/05/30 01:51:25 mikem Exp $
 
 #include <bcm2835.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <signal.h>
 
-int main(int argc, char **argv)
+volatile sig_atomic_t flag = 0;
+
+void int_handler(int dummy) {
+	
+    bcm2835_spi_end();
+    bcm2835_close();
+	flag = 1;
+}
+
+
+int main(int argc, char *argv[])
 {
     // If you call this, it will not actually access the GPIO
 // Use for testing
 //        bcm2835_set_debug(1);
+
+	signal(SIGINT, int_handler);
 
     if (!bcm2835_init())
     {
@@ -41,20 +56,33 @@ int main(int argc, char **argv)
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);                   // The default
     bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_8192); // The default
     bcm2835_spi_chipSelect(BCM2835_SPI_CS0);                      // The default
-    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);      // the default
+    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, HIGH);      // the default
     
     // Send a byte to the slave and simultaneously read a byte back from the slave
     // If you tie MISO to MOSI, you should read back what was sent
-    uint8_t send_data = 0xAC;
-//    while(1) {
-    uint8_t read_data = bcm2835_spi_transfer(send_data);
-    printf("Sent to SPI: 0x%02X. Read back from SPI: 0x%02X.\n", send_data, read_data);
-    if (send_data != read_data)
-      printf("Do you have the loopback from MOSI to MISO connected?\n");
-    sleep(1);
-//    }
-    bcm2835_spi_end();
-    bcm2835_close();
-    return 0;
+	
+	unsigned int send_data;
+
+
+	while(1) {
+		if (flag == 1) {
+			return 0;
+		}
+		scanf("%u", &send_data);
+   		uint8_t read_data = bcm2835_spi_transfer((unsigned char) send_data);
+		sleep(1);
+   		printf("Sent to SPI: 0x%02X. Read back from SPI: 0x%02X.\n", send_data, read_data);
+	}
+
+/*   	if (send_data != read_data) {
+    	printf("Do you have the loopback from MOSI to MISO connected?\n");
+	}*/
+
+	/* when this gets called, the pins go back to gpio mode, meaning the CE pin goes low
+	 * resulting in the Dragon board waiting for more data. Hence, we need to make sure
+	 * not to call these until after the dragon board stops waiting for data
+	 */
+
+	return 0;
 }
 
