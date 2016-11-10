@@ -3,10 +3,11 @@
 
 void timer_5_enable(void);
 void spi_enable(void);
+void pwm_init(void);
 
 char seg_7(char);
 
-int seg_7_val = 0;
+uchar seg_7_val = 0;
 
 void main(void) 
 {
@@ -15,7 +16,7 @@ void main(void)
     DDRB = 0xFF;
     DDRP |= 0x0F;
     PTP &= 0xF0;
-    PTP |= 0x0E;
+    PTP |= 0x0D;
     PORTB = 0x0F;
     
     spi_enable();
@@ -31,28 +32,28 @@ void main(void)
 
 void interrupt 13 timer_5_isr(void)
 {
-    TC5 += 1000;
+    TC5 += 200;
     
     switch(PTP & 0x0F) {
         case 0x07:
+            /* First display */
             PTP = 0x0E;
             PORTB = seg_7(seg_7_val / 1000);
             break;
         case 0x0E:
+            /* Second display */
             PTP = 0x0D;
             PORTB = seg_7((seg_7_val % 1000) / 100);	
             break;
         case 0x0D:
+            /* Third display */
             PTP = 0x0B;
             PORTB = seg_7((seg_7_val % 100) / 10);
             break;
         case 0x0B:
+            /* Fourth display */
             PTP = 0x07;
             PORTB = seg_7((seg_7_val % 10));
-            break;
-        default:
-            PTP = 0x0E;
-            PORTB = seg_7(seg_7_val / 1000);
             break;
     }
     
@@ -60,10 +61,26 @@ void interrupt 13 timer_5_isr(void)
 
 void interrupt 19 spi0_isr(void)
 {
-    char data, spi_reg;
+    uchar data, spi_reg;
     spi_reg = SPI0SR;
     data = SPI0DR;
-    seg_7_val += 1;    
+    SPI0DR = 0x00;
+    seg_7_val = data;    
+}
+
+void pwm_init(void) {
+      
+      PWMCLK = 0;
+      PWMPOL = 0xFF;
+      PWMPRCLK = 0x22;
+      PWMCTL = 0x0C;
+      PWMCAE = 0;
+      PWMPER0 = 158;
+      PWMDTY0 = 79;  
+      PWMCNT0 = 0;
+      PWME = 0xFF;
+      
+           
 }
 
 void timer_5_enable(void) 
@@ -81,12 +98,8 @@ void timer_5_enable(void)
 
 void spi_enable(void) 
 {
-    char dummy_val;
-    SPI0CR1 = 0xC0;
-    SPI0CR2 = 0x00;
-    DDRS = 0x10;
-    while (~ SPI0SR & 0x80);
-    dummy_val = SPI0DR;
+    SPI0CR1 |= 0xC0;
+    //DDRS = 0x10;
 }
 
 char seg_7(char val) 
