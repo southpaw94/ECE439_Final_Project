@@ -119,9 +119,9 @@ def pix_to_ik(px, py, pen_state):
 	
 	# -90 <= theta_two <= +90
 	# theta_one has the same constraints 
-	if (theta_two < -(math.pi/2)):
+	if (theta_two < 0):
 		theta_two += math.pi
-	elif (theta_two > (math.pi/2)):
+	elif (theta_two > math.pi):
 		theta_two -= math.pi
 
 	k1 = a1 + a2 * math.cos(theta_two)
