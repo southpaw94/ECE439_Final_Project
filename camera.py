@@ -29,10 +29,10 @@ def find_pix( ):
 	global image_processed
 	global current_pix
 	global height, width
-	
+
 	if image_processed == False:
-		#image = saved image that we want processed/drawn
-		image = 'black_line.jpg'
+		# image = saved image that we want processed/drawn
+		image = 'lana.jpg'
 		image = cv2.imread(image)
 		cv2.imshow('Saved Original', image)
 		image = cv2.Canny(image, 230, 240)
@@ -40,7 +40,13 @@ def find_pix( ):
 	        height, width = image.shape
        		print "image height = ", height
        		print "image width = ", width
+		print
+		print "image has been read"
+		print
 		image_processed = True	
+
+	print "beginning to look for first white pixel"
+	print
 
 	for i in range(1, height):
 		for j in range(1, width):
@@ -62,13 +68,18 @@ def find_pix( ):
 						pen_down = False						
 
 	print "length of pix_list = ", len(pix_list)
+	print "found all pixels"
+	print
+	print "beginning pixel-to-angle function (inverse kinematics)"
+	print
+
 	for p in range(0, len(pix_list)):
 		px_input = pix_list[p][1]
 		py_input = pix_list[p][0]
 		pen_state = pix_list[p][2]
 		pix_to_ik(px_input, py_input, pen_state)
 
-
+	
 
 
 def follow_pix(k, l):
@@ -140,7 +151,7 @@ def pix_to_ik(px, py, pen_state):
 	angle_array.append(angles)	
 	angles_df = pd.DataFrame(angle_array, columns = ['THETA1', 'THETA2', 'THETA3'])
 	angles_df += 90
-	# return angles_df
+	return angles_df
 
 
 
@@ -148,8 +159,6 @@ def pix_to_ik(px, py, pen_state):
 find_pix()
 connection = create_engine('mysql+mysqlconnector://root:passwd@localhost:3306/ECE_439')
 angles_df.to_sql(name = 'ANGLES', con = connection, if_exists = 'replace', index_label = 'ID')
-print "pix_list = ", pix_list
-print
 print
 print
 print "angles_df = ", angles_df
