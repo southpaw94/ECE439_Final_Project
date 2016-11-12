@@ -6,6 +6,7 @@ import pandas as pd
 import RPi.GPIO as GPIO
 from picamera import PiCamera
 from time import sleep
+from sqlalchemy import create_engine
 
 # global variables
 angle_array = []
@@ -139,23 +140,19 @@ def pix_to_ik(px, py, pen_state):
 	angle_array.append(angles)	
 	angles_df = pd.DataFrame(angle_array, columns = ['THETA1', 'THETA2', 'THETA3'])
 	angles_df += 90
-	return angles_df
+	# return angles_df
 
 
 
 
 find_pix()
+connection = create_engine('mysql+mysqlconnector://root:passwd@localhost:3306/ECE_439')
+angles_df.to_sql(name = 'ANGLES', con = connection, if_exists = 'replace', index_label = 'ID')
 print "pix_list = ", pix_list
-print 
-print
-print
-print "angle_array = ", angle_array
 print
 print
 print
 print "angles_df = ", angles_df
-print 
-print
 print
 # get_pix_saved_image('mountain_river.jpg')
 # pix_to_ik(1280, 1024)
