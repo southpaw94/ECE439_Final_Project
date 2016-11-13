@@ -1,5 +1,7 @@
 #include <my_global.h>
 #include <mysql.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 void finish_with_error(MYSQL *con)
 {
@@ -38,7 +40,8 @@ int main(int argc, char **argv)
 
 	while ((row = mysql_fetch_row(result))) {
 		for (int i = 0; i < num_fields; i++) {
-			printf("%s ", row[i] ? row[i] : "NULL");
+			char value = (char) row[i];
+			printf("%s ", row[i]);
 		}
 		printf("\n");
 	}

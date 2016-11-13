@@ -3,7 +3,7 @@ import pandas as pd
 
 def main():
     
-    data =  [[i, i, i] for i in range(3)]
+    data =  [[i, i, i] for i in range(20000)]
     data = pd.DataFrame(data, columns=
             ['THETA1', 'THETA2', 'THETA3'])
 
