@@ -28,7 +28,26 @@ GPIO.setmode(GPIO.BCM)
 # universal setup for GPIO pin numbering
 
 
-def find_pix():
+def take_image():
+	
+	print
+	print "get ready for the camera to take your picture!"
+	print
+	sleep(5)
+	camera = PiCamera()
+	camera.start_preview()
+	# give user 10 seconds to get ready for picture
+	sleep(10)
+	camera.capture('image_captured.jpg')
+	camera.stop_preview()
+	image_captured = cv2.imread('image_captured.jpg')
+	cv2.imshow('Captured Image', image_captured)
+	image_captured = cv2.cvtColor(image_captured, cv2.COLOR_RGB2GRAY)
+	height_captured, width_captured = image_captured.shape
+	cv2.imwrite('image_captured.jpg', image_captured)
+	find_pix('image_captured.jpg')
+
+def find_pix(input_image):
 
 	# check if first time through to process image once, otherwise skip this step
 	global image
@@ -41,18 +60,22 @@ def find_pix():
 	if image_processed == False:
 		# image = saved image that we want processed/drawn
 		# if you want to draw a test picture, simply replace following line with "image = 'name_of_test_image.jpg'"
-		image ='lana_bw.jpg'
+		image = input_image
 		image = cv2.imread(image)
-		# image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-		image = cv2.resize(image, (220, 170))
-#		cv2.imshow('Saved Original', image)
-		image = cv2.Canny(image, 200, 220)
-#		cv2.imshow('Saved Edges', image)
-	        height, width = image.shape
-       		print "image height = ", height
-       		print "image width = ", width
-		print
 		print "image has been read"
+		print
+		height_original, width_original, color_dimension = image.shape
+		print "original height = ", height_original
+		print "original width = ", width_original
+		print
+		# dimensions should match ratio of 8.5" x 11" paper  
+		image = cv2.resize(image, (352, 272))
+		cv2.imshow('Saved Original', image)
+		image = cv2.Canny(image, 150, 200)
+		cv2.imshow('Saved Edges', image)
+	        height, width = image.shape
+		print "image height = ", height
+       		print "image width = ", width
 		print
 		image_processed = True	
 
@@ -166,16 +189,16 @@ def pix_to_ik(px, py, pen_state):
 
 
 
-
-find_pix()
+take_image()
+# find_pix('lana_bw.jpg')
+print "algorithm has ran its course"
+print "now creating sql table"
 connection = create_engine('mysql+mysqlconnector://root:passwd@localhost:3306/ECE_439')
 angles_df.to_sql(name = 'ANGLES', con = connection, if_exists = 'replace', index_label = 'ID')
 print
 print
 print "angles_df = ", angles_df
 print
-# get_pix_saved_image('mountain_river.jpg')
-# pix_to_ik(1280, 1024)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
