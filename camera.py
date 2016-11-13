@@ -45,9 +45,9 @@ def find_pix():
 		image = cv2.imread(image)
 		# image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 		image = cv2.resize(image, (220, 170))
-		cv2.imshow('Saved Original', image)
+#		cv2.imshow('Saved Original', image)
 		image = cv2.Canny(image, 200, 220)
-		cv2.imshow('Saved Edges', image)
+#		cv2.imshow('Saved Edges', image)
 	        height, width = image.shape
        		print "image height = ", height
        		print "image width = ", width

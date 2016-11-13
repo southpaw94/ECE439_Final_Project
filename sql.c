@@ -1,7 +1,10 @@
-#include <my_global.h>
-#include <mysql.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <bcm2835.h>
+#include <unistd.h>
+#include <string.h>
+#include <my_global.h>
+#include <mysql.h>
 
 void finish_with_error(MYSQL *con)
 {
@@ -13,6 +16,25 @@ void finish_with_error(MYSQL *con)
 
 int main(int argc, char **argv)
 {
+
+    if (!bcm2835_init())
+    {
+      printf("bcm2835_init failed. Are you running as root??\n");
+      return 1;
+    }
+
+    if (!bcm2835_spi_begin())
+    {
+      printf("bcm2835_spi_begin failed. Are you running as root??\n");
+      return 1;
+    }
+    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);      // The default
+    bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);                   // The default
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_65536); // The default
+    bcm2835_spi_chipSelect(BCM2835_SPI_CS0);                      // The default
+    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);      // the default
+
+	/* initialized the SQL connection */
 	MYSQL *con = mysql_init(NULL);
 
 	if (con == NULL) {
@@ -39,10 +61,13 @@ int main(int argc, char **argv)
 	MYSQL_ROW row;
 
 	while ((row = mysql_fetch_row(result))) {
-		for (int i = 0; i < num_fields; i++) {
-			char value = (char) row[i];
-			printf("%s ", row[i]);
+		for (int i = 1; i < num_fields; i++) {
+			unsigned char send_data = (unsigned char) atoi(row[i]);
+   			uint8_t read_data = bcm2835_spi_transfer((unsigned char) send_data);
+   			printf("Sent to SPI: %u\n", (unsigned char) send_data);
+			/* printf("%s ", row[i]); */
 		}
+		usleep(100000);
 		printf("\n");
 	}
 
