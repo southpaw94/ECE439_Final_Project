@@ -70,7 +70,6 @@ int main(int argc, char *argv[])
 		}
 		scanf("%u", &send_data);
    		uint8_t read_data = bcm2835_spi_transfer((unsigned char) send_data);
-		sleep(1);
    		printf("Sent to SPI: 0x%02X. Read back from SPI: 0x%02X.\n", send_data, read_data);
 	}
 
