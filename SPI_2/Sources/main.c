@@ -4,32 +4,47 @@
 void timer_5_enable(void);
 void spi_enable(void);
 void pwm_init(void);
-
+void pwm_write(unsigned char,unsigned char,unsigned char); 
 char seg_7(char);
-
+void MSDelay(char);
 uchar seg_7_val = 0;
+ 
+
+int buffer[6]= {90,180,0,45,30,60}; //100 byte buffer for values from raspi
+
 
 void main(void) 
 {
-    /* put your own code here */
-
+    /* put your own code here */                    
+    char i; 
     DDRB = 0xFF;
-    DDRP |= 0x0F;
+    DDRP = DDRP |  0b00001111;
     PTP &= 0xF0;
     PTP |= 0x0D;
     PORTB = 0x0F;
     
-    spi_enable();
+    // spi_enable();
 
-    timer_5_enable();
+    // timer_5_enable();
 
-    EnableInterrupts;
-
-
-    while(1);
+    // EnableInterrupts;
+    pwm_init();
+    PWMDTY4 = (char) ( 37.0 + (180.0 / 180.0)* 113.0);
+    pwm_write(0,0,0); 
+    MSDelay(1000);
+    pwm_write(90, 0, 0);
+    while(1)
+    {
+      /* for (i = 0; i < 6; i++)
+       {   
+         pwm_write( buffer[i],0,0);
+         MSDelay(30); 
+         PORTB = seg_7(buffer[i]);
+        } 
+         */
                              
+    }
 }
-
 void interrupt 13 timer_5_isr(void)
 {
     TC5 += 200;
@@ -68,20 +83,32 @@ void interrupt 19 spi0_isr(void)
     seg_7_val = data;    
 }
 
-void pwm_init(void) {
-      
-      PWMCLK = 0;
-      PWMPOL = 0xFF;
-      PWMPRCLK = 0x22;
-      PWMCTL = 0x0C;
-      PWMCAE = 0;
-      PWMPER0 = 158;
-      PWMDTY0 = 79;  
-      PWMCNT0 = 0;
-      PWME = 0xFF;
-      
+void pwm_init(void) 
+{
+ 
+        
+  PWMPRCLK=0x05; //ClockA=Fbus/2**8=250KHz
+	PWMSCLA=0x01; 	 //ClockSA=12MHz/2x125=48KHz
+	PWMCLK=0x10; 	 //ClockSA for chan 4
+	PWMPOL=0x10; 		     //high then low for polarity
+	PWMCAE=0x0; 		     //left aligned
+	PWMCTL=0x0;	         //8-bit chan, PWM during freeze and wait
+	PWMPER4=208;
+ 	 //PWM_Freq=ClockSA/100=6000Hz/100=60Hz. CHANGE THIS
+	PWMDTY4=150; 	 //50% duty cycle           AND THIS TO SEE THE EFFECT ON MOTOR. TRY LESS THAN 10%
+	PWMCNT4=10;		 //clear initial counter. This is optional
+	PWME=0x10; 	   //Enable chan 4 PWM
            
 }
+
+void pwm_write(unsigned char theta_1, char theta_2,char theta_3) 
+{
+  char angle1,angle2,angle3;
+
+  angle1 = (char) ( 37.0 + (theta_1 / 180.0)* 113.0);
+  PWMDTY4 = angle1; 
+}
+
 
 void timer_5_enable(void) 
 {
@@ -104,6 +131,7 @@ void spi_enable(void)
 
 char seg_7(char val) 
 {
+    
     switch(val) {
         case 0x00:
             return 0x3F;
@@ -141,3 +169,11 @@ char seg_7(char val)
             return 0x00;    /* Turn display off */
     }
 }
+
+void MSDelay(unsigned int itime)  //millisec delay
+  {
+    unsigned int i; unsigned int j;
+    for(i=0;i<itime;i++)
+      for(j=0;j<331;j++);
+      
+  }
