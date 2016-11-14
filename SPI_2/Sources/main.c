@@ -18,34 +18,27 @@ int buffer[6]= {90,180,0,45,30,60}; //100 byte buffer for values from raspi
 void main(void) 
 {
     /* put your own code here */                    
-    char i; 
+    unsigned char i; 
     DDRB = 0xFF;
     DDRP = DDRP |  0b00001111;
     PTP &= 0xF0;
     PTP |= 0x0D;
     PORTB = 0x0F;
     
-    // spi_enable();
+    spi_enable();
 
-    // timer_5_enable();
+    timer_5_enable();
 
-    // EnableInterrupts;
-    pwm_init();
-    PWMDTY4 = (char) ( 37.0 + (180.0 / 180.0)* 113.0);
-    //pwm_write(0,0,0); 
+    EnableInterrupts;
+  
     pwm_init_16();
     //pwm_write(90, 0, 0);
     while(1)
     {
-      for (i = 0; i < 180; i++) {
-        pwm_write_16(i);
-        MSDelay(10);      }
-      
-      for (i = 180; i > 0; i--) {
-        
-        pwm_write_16(i);
-        MSDelay(10);
-      }
+      pwm_write_16(180);
+      for (i = 0; i < 10; i++)        MSDelay(100);      pwm_write_16(0);
+      for (i = 0; i < 10; i++)
+        MSDelay(100);
       
                              
     }
@@ -125,8 +118,10 @@ void pwm_init_16(void) {
 }
 
 void pwm_write_16(unsigned char angle) {
-  unsigned int dty = (unsigned int) (1350 + angle / 180.0 * 1800);
-  PWMDTY4 = dty >> 8 & 0xFF;
+  /* 1350 -> 900us duty cycle, 3150 -> 2100us duty cycle
+     900 -> 600us duty cycle, 3600 -> 2400us duty cycle */
+  int dty = (int) (900 + angle / 180.0 * 2700.0);
+  PWMDTY4 = (dty >> 8) & 0xFF;
   PWMDTY5 = dty & 0xFF;
 }
 
