@@ -4,7 +4,9 @@
 void timer_5_enable(void);
 void spi_enable(void);
 void pwm_init(void);
+void pwm_init_16();
 void pwm_write(unsigned char,unsigned char,unsigned char); 
+void pwm_write_16(unsigned char);
 char seg_7(char);
 void MSDelay(char);
 uchar seg_7_val = 0;
@@ -30,18 +32,21 @@ void main(void)
     // EnableInterrupts;
     pwm_init();
     PWMDTY4 = (char) ( 37.0 + (180.0 / 180.0)* 113.0);
-    pwm_write(0,0,0); 
-    MSDelay(1000);
-    pwm_write(90, 0, 0);
+    //pwm_write(0,0,0); 
+    pwm_init_16();
+    //pwm_write(90, 0, 0);
     while(1)
     {
-      /* for (i = 0; i < 6; i++)
-       {   
-         pwm_write( buffer[i],0,0);
-         MSDelay(30); 
-         PORTB = seg_7(buffer[i]);
-        } 
-         */
+      for (i = 0; i < 180; i++) {
+        pwm_write_16(i);
+        MSDelay(10);      }
+      
+      for (i = 180; i > 0; i--) {
+        
+        pwm_write_16(i);
+        MSDelay(10);
+      }
+      
                              
     }
 }
@@ -101,11 +106,35 @@ void pwm_init(void)
            
 }
 
+void pwm_init_16(void) {
+  PWMCLK = 0x00;
+  PWMPOL = 0x20;
+  PWMPRCLK = 0x44;
+  PWMCTL = 0x4C;
+  PWMCAE = 0x00;
+  /* asm {
+    movw #30000,PWMPER4
+    movw #24000,PWMDTY4
+  }  */
+  
+  PWMPER4 = 30000 >> 8 & 0xFF;
+  PWMPER5 = 30000 & 0xFF;
+  PWMDTY4 = 0 >> 8 & 0xFF;
+  PWMDTY5 = 0 & 0xFF;
+  PWME_PWME5 = 1;
+}
+
+void pwm_write_16(unsigned char angle) {
+  unsigned int dty = (unsigned int) (1350 + angle / 180.0 * 1800);
+  PWMDTY4 = dty >> 8 & 0xFF;
+  PWMDTY5 = dty & 0xFF;
+}
+
 void pwm_write(unsigned char theta_1, char theta_2,char theta_3) 
 {
   char angle1,angle2,angle3;
 
-  angle1 = (char) ( 37.0 + (theta_1 / 180.0)* 113.0);
+  angle1 = (char) ( 58.0 + (theta_1 / 180.0)* 74.0);
   PWMDTY4 = angle1; 
 }
 
