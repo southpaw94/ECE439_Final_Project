@@ -6,7 +6,7 @@ void spi_enable(void);
 void pwm_init(void);
 void pwm_init_16();
 void pwm_write(unsigned char,unsigned char,unsigned char); 
-void pwm_write_16(unsigned char);
+void pwm_write_16(unsigned char,unsigned char, unsigned char);
 char seg_7(char);
 void MSDelay(char);
 uchar seg_7_val = 0;
@@ -35,10 +35,12 @@ void main(void)
     //pwm_write(90, 0, 0);
     while(1)
     {
-      pwm_write_16(180);
-      for (i = 0; i < 10; i++)        MSDelay(100);      pwm_write_16(0);
-      for (i = 0; i < 10; i++)
-        MSDelay(100);
+      pwm_write_16(0,203,0);
+      //for (i = 0; i < 10; i++)
+        MSDelay(1000);
+        //pwm_write_16(0,0,0);
+        //for (i = 0; i < 10; i++)
+          MSDelay(100);
       
                              
     }
@@ -101,33 +103,49 @@ void pwm_init(void)
 
 void pwm_init_16(void) {
   PWMCLK = 0x00;
-  PWMPOL = 0x20;
+  PWMPOL = 0x2A;
   PWMPRCLK = 0x44;
-  PWMCTL = 0x4C;
+  PWMCTL = 0x7C;    //change to 7c to enable cat pwm reg 01, 23 to 45
   PWMCAE = 0x00;
   /* asm {
     movw #30000,PWMPER4
     movw #24000,PWMDTY4
   }  */
-  
+  PWMPER0 = 30000 >> 8 & 0xFF;
+  PWMPER1 = 30000 & 0xFF;
+  PWMPER2 = 30000 >> 8 & 0xFF;
+  PWMPER3 = 30000 & 0xFF;
   PWMPER4 = 30000 >> 8 & 0xFF;
   PWMPER5 = 30000 & 0xFF;
+  PWMDTY0 = 0 >> 8 & 0xFF;
+  PWMDTY1 = 0 & 0xFF;
+  PWMDTY2 = 0 >> 8 & 0xFF;
+  PWMDTY3 = 0 & 0xFF;
   PWMDTY4 = 0 >> 8 & 0xFF;
   PWMDTY5 = 0 & 0xFF;
+  PWME_PWME1 = 1;
+  PWME_PWME3 = 1;
   PWME_PWME5 = 1;
 }
 
-void pwm_write_16(unsigned char angle) {
+void pwm_write_16(unsigned char angle1, unsigned char angle2,unsigned char angle3) {
   /* 1350 -> 900us duty cycle, 3150 -> 2100us duty cycle
      900 -> 600us duty cycle, 3600 -> 2400us duty cycle */
-  int dty = (int) (900 + angle / 180.0 * 2700.0);
-  PWMDTY4 = (dty >> 8) & 0xFF;
-  PWMDTY5 = dty & 0xFF;
+  int dty1 = (int) (1125 + angle1 / 180.0 * 2250.0);
+  int dty2 = (int) (900 + angle2 / 180.0 * 2700.0);
+  int dty3 = (int) (900 + angle3 / 180.0 * 2700.0);
+  PWMDTY0  = (dty1 >> 8) & 0xFF;
+  PWMDTY1  = dty1 & 0xFF;
+  PWMDTY2  = (dty2 >> 8) & 0xFF;
+  PWMDTY3  = dty2 & 0xFF;
+  PWMDTY4  = (dty3 >> 8) & 0xFF;
+  PWMDTY5  = dty3 & 0xFF;
+  
 }
 
-void pwm_write(unsigned char theta_1, char theta_2,char theta_3) 
+void pwm_write(unsigned char theta_1, unsigned char theta_2,unsigned char theta_3) 
 {
-  char angle1,angle2,angle3;
+  unsigned char angle1,angle2,angle3;
 
   angle1 = (char) ( 58.0 + (theta_1 / 180.0)* 74.0);
   PWMDTY4 = angle1; 
