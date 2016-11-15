@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);                   // The default
     bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_8192); // The default
     bcm2835_spi_chipSelect(BCM2835_SPI_CS0);                      // The default
-    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, HIGH);      // the default
+    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);      // the default
     
     // Send a byte to the slave and simultaneously read a byte back from the slave
     // If you tie MISO to MOSI, you should read back what was sent

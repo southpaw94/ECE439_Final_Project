@@ -8,6 +8,12 @@ from picamera import PiCamera
 from time import sleep
 from sqlalchemy import create_engine
 
+# ideas: resize image to something much smaller, with the same height/width ratio as either Pi camera
+# or the paper (8.5" x 11")
+# if we use a much smaller image, we will have less pixels and therefore less data, and the entire
+# process will take a shorter amount of time
+
+
 # global variables
 angle_array = []
 pix_list = []
@@ -15,12 +21,33 @@ pen_down = False
 image_processed = False
 current_pix = []
 angles_df = pd.DataFrame()
+height = 0
+width = 0
 
 GPIO.setmode(GPIO.BCM)
 # universal setup for GPIO pin numbering
 
 
-def find_pix( ):
+def take_image():
+	
+	print
+	print "get ready for the camera to take your picture!"
+	print
+	sleep(5)
+	camera = PiCamera()
+	camera.start_preview()
+	# give user 10 seconds to get ready for picture
+	sleep(10)
+	camera.capture('image_captured.jpg')
+	camera.stop_preview()
+	image_captured = cv2.imread('image_captured.jpg')
+	cv2.imshow('Captured Image', image_captured)
+	image_captured = cv2.cvtColor(image_captured, cv2.COLOR_RGB2GRAY)
+	height_captured, width_captured = image_captured.shape
+	cv2.imwrite('image_captured.jpg', image_captured)
+	find_pix('image_captured.jpg')
+
+def find_pix(input_image):
 
 	# check if first time through to process image once, otherwise skip this step
 	global image
@@ -32,16 +59,23 @@ def find_pix( ):
 
 	if image_processed == False:
 		# image = saved image that we want processed/drawn
-		image = 'lana.jpg'
+		# if you want to draw a test picture, simply replace following line with "image = 'name_of_test_image.jpg'"
+		image = input_image
 		image = cv2.imread(image)
+		print "image has been read"
+		print
+		height_original, width_original, color_dimension = image.shape
+		print "original height = ", height_original
+		print "original width = ", width_original
+		print
+		# dimensions should match ratio of 8.5" x 11" paper  
+		image = cv2.resize(image, (352, 272))
 		cv2.imshow('Saved Original', image)
-		image = cv2.Canny(image, 230, 240)
+		image = cv2.Canny(image, 150, 200)
 		cv2.imshow('Saved Edges', image)
 	        height, width = image.shape
-       		print "image height = ", height
+		print "image height = ", height
        		print "image width = ", width
-		print
-		print "image has been read"
 		print
 		image_processed = True	
 
@@ -56,7 +90,7 @@ def find_pix( ):
 				# delete already drawn pixels
 				image[i, j] = 0
 				# make sure we're in the boundaries of the image
-				if ((i-1 > 0) and (j-1 > 0) and (i < height) and (j < width)):
+				if ((i-1 > 0) and (j-1 > 0) and (i < height-1) and (j < width-1)):
 					# check neighborhood (3x3)
 					# if white pixel is in neighborhood, call follow_pix( ) with current location
 					if (image[i-1,j-1]!=0 or image[i-1,j]!=0 or image[i-1,j+1]!=0 or \
@@ -91,7 +125,6 @@ def follow_pix(k, l):
 	global pix_list
 	global pen_down
 	global current_pix
-	global height, width
 
 	for n in range(k-1, k+2):
 		for o in range(l-1, l+2):
@@ -109,15 +142,15 @@ def follow_pix(k, l):
 #  on each joint
 def pix_to_ik(px, py, pen_state):
 
-	global pix_list
 	global angle_array
 	global angles_df
+	global pix_list_df
 
 	# 1280 is width of image from pi cam, 232.72 is 2 inches (for offset) 
 	#  after multiplying by scalar
-	cx = (11.0 / 1280.0) * (px + 232.727272727)
+	cx = (11.0 / width) * (px + (2.0*(width/11.0)-px))
 	# 1024 is height of image from pi cam, -py is to flip axis to Cartesian	
-        cy = (8.5 / 1024.0) * (-py + 1024.0)
+        cy = (8.5 / height) * (-py + height)
 	cartesian = [cx, cy]
 	# print "cartesian coords = ", cartesian
 	
@@ -128,11 +161,11 @@ def pix_to_ik(px, py, pen_state):
 	alpha = (math.pow(cx, 2) + math.pow(cy, 2) - math.pow(a1, 2) - math.pow(a2, 2)) / (2 * a1 * a2)
 	theta_two = math.atan2(math.sqrt(1 - math.pow(alpha, 2)), alpha)
 	
-	# -90 <= theta_two <= +90
-	# theta_one has the same constraints 
-	if (theta_two < 0):
+	#  0 <= theta_two <= +180
+	# -90 <= theta_one <= +90 
+	if (theta_two < 0.0):
 		theta_two += math.pi
-	elif (theta_two > math.pi):
+	elif (theta_two > 180.0):
 		theta_two -= math.pi
 
 	k1 = a1 + a2 * math.cos(theta_two)
@@ -141,30 +174,31 @@ def pix_to_ik(px, py, pen_state):
 	theta_one = math.atan2(cy, cx) - gamma
 	
 	if pen_state == True:
-		theta_three = 90
+		theta_three = 90.0
 	elif pen_state == False:
-		theta_three = 0
+		theta_three = 0.0
 
 	theta_one = round(math.degrees(theta_one))  # convert from rad to deg
+	theta_one += 90.0
 	theta_two = round(math.degrees(theta_two))  # convert from rad to deg
 	angles = [theta_one, theta_two, theta_three]
 	angle_array.append(angles)	
 	angles_df = pd.DataFrame(angle_array, columns = ['THETA1', 'THETA2', 'THETA3'])
-	angles_df += 90
+	
 	return angles_df
 
 
 
-
-find_pix()
+take_image()
+# find_pix('lana_bw.jpg')
+print "algorithm has ran its course"
+print "now creating sql table"
 connection = create_engine('mysql+mysqlconnector://root:passwd@localhost:3306/ECE_439')
 angles_df.to_sql(name = 'ANGLES', con = connection, if_exists = 'replace', index_label = 'ID')
 print
 print
 print "angles_df = ", angles_df
 print
-# get_pix_saved_image('mountain_river.jpg')
-# pix_to_ik(1280, 1024)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
