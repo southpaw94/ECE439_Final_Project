@@ -3,7 +3,9 @@ import cv2
 import math
 import numpy as np
 import scipy as sp
+import matplotlib
 import matplotlib.pyplot as plt
+matplotlib.use("TkAgg")
 import pandas as pd
 import RPi.GPIO as GPIO
 from picamera import PiCamera
@@ -17,6 +19,8 @@ from sqlalchemy import create_engine
 
 
 # global variables
+image = 0
+plot_image = 0
 angle_array = []
 pix_list = []
 pen_down = False
@@ -58,6 +62,7 @@ def find_pix(input_image):
 	global image_processed
 	global current_pix
 	global height, width
+	global plot_image
 
 	if image_processed == False:
 		# image = saved image that we want processed/drawn
@@ -75,6 +80,9 @@ def find_pix(input_image):
 		# 352 x 272 
 		image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 		image = cv2.resize(image, (352, 272))
+		# image for plot_points() function; allows us to plot over original image
+		plot_image = image
+		cv2.imwrite('plot_image.jpg', plot_image)
 		cv2.imshow('Saved Original', image)
 		image = cv2.Canny(image, 125, 175)
 		cv2.imshow('Saved Edges', image)
@@ -197,38 +205,41 @@ def pix_to_ik(px, py, pen_state):
 # function to plot points/lines being drawn as they are drawn in a scatterplot
 def plot_points():
 
-	a1 = 200.0 / 25.4 # link 1 length
-	a2 = 200.0 / 25.4 # link 2 length
-
-	cx_array = []
-	cy_array = []
 	color_array = []
-
-	for q in range(0, len(angle_array)):
-		theta_one = (angle_array[q][0]) - 90.0
-		theta_one = math.radians(theta_one)
-		theta_two = math.radians(angle_array[q][1])
-		theta_three = math.radians(angle_array[q][2])
-	
-		x = a1 * math.cos(theta_one) + a2 * math.cos(theta_one + theta_two)
-		y = a1 * math.sin(theta_one) + a2 * math.sin(theta_one + theta_two)
-	
-		if theta_three == (math.pi / 2):
-			color = "black"
-		else:
-			color = "white"
-			
-		cx_array.append(x)
-		cy_array.append(y)
-		color_array.append(color)
-
-	plt.axis([0.0, 13.0, 0.0, 8.5])
+	count = 0
+	plt.axis([0, width, height, 0])
 	plt.ion()
 
-	for r in range(1, len(cx_array)):
-		print "\rcurrent angle[", r, "] = ", angle_array[r]
-		lines = plt.plot([cx_array[r-1], cx_array[r]], [cy_array[r-1], cy_array[r]], color = color_array[r])
-		lines = plt.plot([cx_array[r], cx_array[r+1]], [cy_array[r], cy_array[r+1]], color = color_array[r])
+	image_2 = plt.imread('plot_image.jpg')
+	image_plot = plt.imshow(image_2, cmap = 'gray')
+	
+	for r in range(1, len(pix_list)-1, 2):
+		count += 1
+		r_float = float(r) # this necessary so progress != 0.0 every time
+		progress = 100.0 * (r_float / len(pix_list))
+		theta_three = math.radians(angle_array[r][2])
+
+		# keep track of and tell user progress so far 
+		if (count % 20 == 0):
+			print
+			print
+			print "progress :", round(progress, 1), "%"		
+			print
+			print
+
+		if theta_three == (math.pi/ 2):
+			line_color = 'r'
+			alpha_val = 1.0
+			plot_pen_state = True
+		else:
+			line_color = 'w--'
+			alpha_val = 0.2
+			plot_pen_state = False
+
+		print "pen state: ", plot_pen_state
+
+		lines = plt.plot([pix_list[r-1][1], pix_list[r][1]], [pix_list[r-1][0], pix_list[r][0]], line_color, alpha = alpha_val)
+		lines = plt.plot([pix_list[r][1], pix_list[r+1][1]], [pix_list[r][0], pix_list[r+1][0]], line_color, alpha = alpha_val) 
 		plt.draw()
 
 
@@ -240,10 +251,6 @@ find_pix('lana_bw.jpg')
 
 print "algorithm has ran its course"
 print
-print "plotting what the robot is drawing"
-print
-
-plot_points()
 
 print "now creating sql table"
 connection = create_engine('mysql+mysqlconnector://root:passwd@localhost:3306/ECE_439')
@@ -253,6 +260,10 @@ print
 print
 print "angles_df = ", angles_df
 print
+
+print "begin plotting what the robot is drawing"
+print
+plot_points()
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
