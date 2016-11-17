@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 			unsigned char send_data = (unsigned char) atoi(row[i]);
    			uint8_t read_data = bcm2835_spi_transfer((unsigned char) send_data);
    			printf("Sent to SPI: %u\n", send_data);
-			usleep(5000);
+			usleep(50000);
 			/* printf("%s ", row[i]); */
 		}
 		usleep(500000);

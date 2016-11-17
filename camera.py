@@ -247,7 +247,7 @@ def plot_points():
 
 # take_image()
 # find_pix('mountain_river.jpg')
-find_pix('lana_bw.jpg')
+find_pix('circle.png')
 
 print "algorithm has ran its course"
 print
