@@ -86,10 +86,10 @@ def find_pix(input_image):
 
 	print "beginning to look for first white pixel"
 	print
-
 	for i in range(1, height):
 		for j in range(1, width):
 			if image[i, j] != 0:
+				pen_down = False
 				current_pix = [i, j, pen_down]
 				pix_list.append(current_pix)
 				# delete already drawn pixels
@@ -104,7 +104,7 @@ def find_pix(input_image):
 						follow_pix(i, j)
 					else:
 						# if no white pixels in neighborhood, lift pen up until next pixel is found
-						pen_down = False						
+						pen_down = False
 
 	print "length of pix_list = ", len(pix_list)
 	print "found all pixels"
@@ -142,7 +142,6 @@ def follow_pix(k, l):
 					follow_pix(current_pix[0], current_pix[1])
 
 
-
 #  function to convert a pixel coordinate into angles for the servos
 #  on each joint
 def pix_to_ik(px, py, pen_state):
@@ -153,9 +152,9 @@ def pix_to_ik(px, py, pen_state):
 
 	# 1280 is width of image from pi cam, 232.72 is 2 inches (for offset) 
 	#  after multiplying by scalar
-	cx = (11.0 / width) * (px +(2.0*(width/11.0)))
+	cx = ((px * 11.0) / width) + 2.0
 	# 1024 is height of image from pi cam, -py is to flip axis to Cartesian	
-        cy = (8.5 / height) * (-py + height)
+        cy = ((-py * 8.5) / height) + 8.5
 	cartesian = [cx, cy]
 	# print "cartesian coords = ", cartesian
 	
@@ -184,7 +183,7 @@ def pix_to_ik(px, py, pen_state):
 		theta_three = 0.0
 
 	theta_one = round(math.degrees(theta_one))  # convert from rad to deg
-	theta_one += 90.0
+	theta_one += 90.0                           # add +90 so we can stick with uint's
 	theta_two = round(math.degrees(theta_two))  # convert from rad to deg
 	angles = [theta_one, theta_two, theta_three]
 	angle_array.append(angles)	
@@ -192,14 +191,18 @@ def pix_to_ik(px, py, pen_state):
 	
 	return angles_df
 
-# function to plot points/lines being drawn as they are drawn
+
+
+
+# function to plot points/lines being drawn as they are drawn in a scatterplot
 def plot_points():
 
 	a1 = 200.0 / 25.4 # link 1 length
 	a2 = 200.0 / 25.4 # link 2 length
 
-	x_array = []
-	y_array = []
+	cx_array = []
+	cy_array = []
+	color_array = []
 
 	for q in range(0, len(angle_array)):
 		theta_one = (angle_array[q][0]) - 90.0
@@ -211,33 +214,41 @@ def plot_points():
 		y = a1 * math.sin(theta_one) + a2 * math.sin(theta_one + theta_two)
 	
 		if theta_three == (math.pi / 2):
-			x_array.append(x)
-			y_array.append(y)
+			color = "black"
+		else:
+			color = "white"
+			
+		cx_array.append(x)
+		cy_array.append(y)
+		color_array.append(color)
 
-	line = plt.scatter(x_array, y_array, s = 0.2)
-	# to change size in above function, add 's = number' to end
-	# plt.scatter(x_array, y_array, s = 1)
 	plt.axis([0.0, 13.0, 0.0, 8.5])
-	plt.show()
+	plt.ion()
 
-	# need to make this function plot continuously over time with a 
-	# small delay, to make it appear as if the computer is drawing the 
-	# picture along with the robot
-	#
-	# instead of points, the function should plot continuously from point
-	# to point (tiny lines) with a small delay
-
+	for r in range(1, len(cx_array)):
+		print "\rcurrent angle[", r, "] = ", angle_array[r]
+		lines = plt.plot([cx_array[r-1], cx_array[r]], [cy_array[r-1], cy_array[r]], color = color_array[r])
+		lines = plt.plot([cx_array[r], cx_array[r+1]], [cy_array[r], cy_array[r+1]], color = color_array[r])
+		plt.draw()
 
 
 
 
 # take_image()
-find_pix('mountain_river.jpg')
-plot_points()
+# find_pix('mountain_river.jpg')
+find_pix('lana_bw.jpg')
+
 print "algorithm has ran its course"
+print
+print "plotting what the robot is drawing"
+print
+
+plot_points()
+
 print "now creating sql table"
 connection = create_engine('mysql+mysqlconnector://root:passwd@localhost:3306/ECE_439')
 angles_df.to_sql(name = 'ANGLES', con = connection, if_exists = 'replace', index_label = 'ID')
+
 print
 print
 print "angles_df = ", angles_df

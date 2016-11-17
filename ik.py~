@@ -2,11 +2,11 @@ import math
 def pix_to_ik(px, py, pen_state):
 
 
-	width = 352
-	height = 272
+	width = 1
+	height = 1
 	# 1280 is width of image from pi cam, 232.72 is 2 inches (for offset) 
 	#  after multiplying by scalar
-	cx = (11.0 / width) * (px +(2.0*(width/11.0)))
+	cx = (11.0 / width) * (px + (2.0*(width/11.0)-px))
 	# 1024 is height of image from pi cam, -py is to flip axis to Cartesian	
 	cy = (8.5 / height) * (-py + height)
 	cartesian = [cx, cy]
