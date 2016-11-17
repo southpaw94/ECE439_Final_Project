@@ -2,8 +2,6 @@
 import cv2
 import math
 import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
 import pandas as pd
 import RPi.GPIO as GPIO
 from picamera import PiCamera
@@ -26,8 +24,8 @@ angles_df = pd.DataFrame()
 height = 0
 width = 0
 
-# universal setup for GPIO pin numbering
 GPIO.setmode(GPIO.BCM)
+# universal setup for GPIO pin numbering
 
 
 def take_image():
@@ -64,23 +62,20 @@ def find_pix(input_image):
 		# if you want to draw a test picture, simply replace following line with "image = 'name_of_test_image.jpg'"
 		image = input_image
 		image = cv2.imread(image)
-		print 
 		print "image has been read"
 		print
 		height_original, width_original, color_dimension = image.shape
 		print "original height = ", height_original
 		print "original width = ", width_original
 		print
-		# dimensions should match ratio of 8.5" x 11" paper
-		# 352 x 272 
-		image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+		# dimensions should match ratio of 8.5" x 11" paper  
 		image = cv2.resize(image, (352, 272))
 		cv2.imshow('Saved Original', image)
-		image = cv2.Canny(image, 125, 175)
+		image = cv2.Canny(image, 150, 200)
 		cv2.imshow('Saved Edges', image)
 	        height, width = image.shape
-		print "resized image height = ", height
-       		print "resized image width = ", width
+		print "image height = ", height
+       		print "image width = ", width
 		print
 		image_processed = True	
 
@@ -153,7 +148,7 @@ def pix_to_ik(px, py, pen_state):
 
 	# 1280 is width of image from pi cam, 232.72 is 2 inches (for offset) 
 	#  after multiplying by scalar
-	cx = (11.0 / width) * (px +(2.0*(width/11.0)))
+	cx = (11.0 / width) * (px + (2.0*(width/11.0)-px))
 	# 1024 is height of image from pi cam, -py is to flip axis to Cartesian	
         cy = (8.5 / height) * (-py + height)
 	cartesian = [cx, cy]
@@ -192,48 +187,10 @@ def pix_to_ik(px, py, pen_state):
 	
 	return angles_df
 
-# function to plot points/lines being drawn as they are drawn
-def plot_points():
-
-	a1 = 200.0 / 25.4 # link 1 length
-	a2 = 200.0 / 25.4 # link 2 length
-
-	x_array = []
-	y_array = []
-
-	for q in range(0, len(angle_array)):
-		theta_one = (angle_array[q][0]) - 90.0
-		theta_one = math.radians(theta_one)
-		theta_two = math.radians(angle_array[q][1])
-		theta_three = math.radians(angle_array[q][2])
-	
-		x = a1 * math.cos(theta_one) + a2 * math.cos(theta_one + theta_two)
-		y = a1 * math.sin(theta_one) + a2 * math.sin(theta_one + theta_two)
-	
-		if theta_three == (math.pi / 2):
-			x_array.append(x)
-			y_array.append(y)
-
-	line = plt.scatter(x_array, y_array, s = 0.2)
-	# to change size in above function, add 's = number' to end
-	# plt.scatter(x_array, y_array, s = 1)
-	plt.axis([0.0, 13.0, 0.0, 8.5])
-	plt.show()
-
-	# need to make this function plot continuously over time with a 
-	# small delay, to make it appear as if the computer is drawing the 
-	# picture along with the robot
-	#
-	# instead of points, the function should plot continuously from point
-	# to point (tiny lines) with a small delay
 
 
-
-
-
-# take_image()
-find_pix('mountain_river.jpg')
-plot_points()
+take_image()
+# find_pix('lana_bw.jpg')
 print "algorithm has ran its course"
 print "now creating sql table"
 connection = create_engine('mysql+mysqlconnector://root:passwd@localhost:3306/ECE_439')
