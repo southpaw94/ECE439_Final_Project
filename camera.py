@@ -7,8 +7,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use("TkAgg")
 import pandas as pd
-# import RPi.GPIO as GPIO
-# from picamera import PiCamera
+import RPi.GPIO as GPIO
+from picamera import PiCamera
 from time import sleep
 from sqlalchemy import create_engine
 
@@ -79,7 +79,7 @@ def find_pix(input_image):
 		# dimensions should match ratio of 8.5" x 11" paper
 		# 352 x 272 
 		image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-		image = cv2.resize(image, (352, 272))
+		image = cv2.resize(image, (100, 77))
 		# image for plot_points() function; allows us to plot over original image
 		plot_image = image
 		cv2.imwrite('plot_image.jpg', plot_image)
@@ -150,6 +150,15 @@ def follow_pix(k, l):
 					pen_down = False
 		        		image[n, o] = 0
 					follow_pix(current_pix[0], current_pix[1])
+
+	pen_down = False
+	current_pix = [n, o, pen_down]
+	pix_list.append(current_pix)
+	print
+	print
+	print "current_pix = ", current_pix
+	print
+	print
 
 
 #  function to convert a pixel coordinate into angles for the servos
@@ -250,8 +259,8 @@ def plot_points():
 # take_image()
 
 # find_pix('mountain_river.jpg')
-# find_pix('twocircles.jpg')
-find_pix('lana_bw.jpg')
+find_pix('twocircles.jpg')
+# find_pix('lana_bw.jpg')
 
 print "algorithm has ran its course"
 print
