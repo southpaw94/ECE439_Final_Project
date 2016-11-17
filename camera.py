@@ -84,7 +84,7 @@ def find_pix(input_image):
 		plot_image = image
 		cv2.imwrite('plot_image.jpg', plot_image)
 		cv2.imshow('Saved Original', image)
-		image = cv2.Canny(image, 125, 175)
+		image = cv2.Canny(image, 150, 175)
 		cv2.imshow('Saved Edges', image)
 	        height, width = image.shape
 		print "resized image height = ", height
@@ -94,6 +94,7 @@ def find_pix(input_image):
 
 	print "beginning to look for first white pixel"
 	print
+
 	for i in range(1, height):
 		for j in range(1, width):
 			if image[i, j] != 0:
@@ -141,12 +142,13 @@ def follow_pix(k, l):
 
 	for n in range(k-1, k+2):
 		for o in range(l-1, l+2):
-			if ((n < height) and (o < width)): 
+			if ((n < height) and (o < width)):
 				if image[n, o] != 0:
 					pen_down = True
 					current_pix = [n, o, pen_down]
 					pix_list.append(current_pix)
-			        	image[n, o] = 0
+					pen_down = False
+		        		image[n, o] = 0
 					follow_pix(current_pix[0], current_pix[1])
 
 
@@ -167,7 +169,7 @@ def pix_to_ik(px, py, pen_state):
 	# print "cartesian coords = ", cartesian
 	
 	a1 = 200.0  # measurement in mm for link 1
-	a2 = 200.0  # measurement in mm for link 2
+	a2 = 236.0  # measurement in mm for link 2
 	a1 = a1 / 25.4  # convert to inches
 	a2 = a2 / 25.4  # convert to inches
 	alpha = (math.pow(cx, 2) + math.pow(cy, 2) - math.pow(a1, 2) - math.pow(a2, 2)) / (2 * a1 * a2)
@@ -185,9 +187,9 @@ def pix_to_ik(px, py, pen_state):
 	gamma = math.atan2(k2, k1)
 	theta_one = math.atan2(cy, cx) - gamma
 	
-	if pen_state == True:
-		theta_three = 90.0
-	elif pen_state == False:
+	if (pen_state == True):
+		theta_three = 60.0
+	elif (pen_state == False):
 		theta_three = 0.0
 
 	theta_one = round(math.degrees(theta_one))  # convert from rad to deg
@@ -207,6 +209,7 @@ def plot_points():
 
 	color_array = []
 	count = 0
+	progress = 0
 	plt.axis([0, width, height, 0])
 	plt.ion()
 
@@ -216,27 +219,25 @@ def plot_points():
 	for r in range(1, len(pix_list)-1, 2):
 		count += 1
 		r_float = float(r) # this necessary so progress != 0.0 every time
-		progress = 100.0 * (r_float / len(pix_list))
+		progress = round((100.0 * (r_float / len(pix_list))), 1)
 		theta_three = math.radians(angle_array[r][2])
 
 		# keep track of and tell user progress so far 
-		if (count % 20 == 0):
+		if (count % 10 == 0):
 			print
-			print
-			print "progress :", round(progress, 1), "%"		
-			print
+			print "\rprogress: ", progress, "%"
 			print
 
-		if theta_three == (math.pi/ 2):
+		if theta_three == (math.pi / 3):
+			print "\rpen_down = true"
 			line_color = 'r'
 			alpha_val = 1.0
 			plot_pen_state = True
 		else:
+			print "\rpen_down = false"
 			line_color = 'w--'
 			alpha_val = 0.2
 			plot_pen_state = False
-
-		print "pen state: ", plot_pen_state
 
 		lines = plt.plot([pix_list[r-1][1], pix_list[r][1]], [pix_list[r-1][0], pix_list[r][0]], line_color, alpha = alpha_val)
 		lines = plt.plot([pix_list[r][1], pix_list[r+1][1]], [pix_list[r][0], pix_list[r+1][0]], line_color, alpha = alpha_val) 
@@ -245,9 +246,12 @@ def plot_points():
 
 
 
+
 # take_image()
+
 # find_pix('mountain_river.jpg')
-find_pix('circle.png')
+# find_pix('twocircles.jpg')
+find_pix('lana_bw.jpg')
 
 print "algorithm has ran its course"
 print
