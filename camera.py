@@ -79,6 +79,9 @@ def process_image(process_input):
 		plot_image = image
 		cv2.imwrite('plot_image.jpg', plot_image)
 		cv2.imshow('Saved Original', image)
+		print "Move the trackbar to adjust the number of edges"
+                print "More edges means more detail, but a longer drawing time"
+                print "Once the image with edges is ready, hit ESC"
 		
                 def nothing(x):
                         pass
@@ -204,11 +207,17 @@ def pix_to_ik(px, py, pen_state):
 	global angles_df
 	global pix_list_df
 
+        # x_offset was 2.0 before shifting the drawing surface over to
+        # accomodate extending a2 (to allow for theta_three = 60.0)
+        # all units of measurement for distance should be in inches
+        x_offset = 4.5
+        y_offset = 8.5
+        
 	# 1280 is width of image from pi cam, 232.72 is 2 inches (for offset) 
 	#  after multiplying by scalar
-	cx = ((px * 11.0) / width) + 2.0
+	cx = ((px * 11.0) / width) + x_offset
 	# 1024 is height of image from pi cam, -py is to flip axis to Cartesian	
-        cy = ((-py * 8.5) / height) + 8.5
+        cy = ((-py * 8.5) / height) + y_offset
 	cartesian = [cx, cy]
 	# print "cartesian coords = ", cartesian
 	
@@ -216,29 +225,41 @@ def pix_to_ik(px, py, pen_state):
 	a2 = 236.0  # measurement in mm for link 2
 	a1 = a1 / 25.4  # convert to inches
 	a2 = a2 / 25.4  # convert to inches
-	alpha = (math.pow(cx, 2) + math.pow(cy, 2) - math.pow(a1, 2) - math.pow(a2, 2)) / (2 * a1 * a2)
-	theta_two = math.atan2(math.sqrt(1 - math.pow(alpha, 2)), alpha)
+	alpha = (math.pow(cx, 2.0) + math.pow(cy, 2.0) - math.pow(a1, 2.0) - math.pow(a2, 2.0)) / (2.0 * a1 * a2)
+
+        # need to check so atan2 for theta_two stays within bounds; if not, set theta_two = 0
+	if ((math.pow(alpha, 2)) > 1.0):
+                print "pix_to_ik value out of bounds"
+                print "(cx, cy) = ", cartesian
+                print "setting theta_two to 0 degrees"
+                print
+                theta_two = 0.0
+        else:
+                theta_two = math.atan2(math.sqrt(1.0 - math.pow(alpha, 2.0)), alpha)
 	
 	#  0 <= theta_two <= +180
 	# -90 <= theta_one <= +90 
 	if (theta_two < 0.0):
 		theta_two += math.pi
-	elif (theta_two > 180.0):
+	elif (theta_two > math.pi):
 		theta_two -= math.pi
 
+        # use k1, k2, and gamma to avoid the use of acos()
 	k1 = a1 + a2 * math.cos(theta_two)
 	k2 = a2 * math.sin(theta_two)
 	gamma = math.atan2(k2, k1)
 	theta_one = math.atan2(cy, cx) - gamma
-	
+
+        # when the pen is down, theta_three is at 60 degrees
 	if (pen_state == True):
 		theta_three = 60.0
 	elif (pen_state == False):
 		theta_three = 0.0
 
 	theta_one = round(math.degrees(theta_one))  # convert from rad to deg
-	theta_one += 90.0                           # add +90 so we can stick with uint's
+	theta_one += 90.0                           # add +90 so we can stick with pos. integers
 	theta_two = round(math.degrees(theta_two))  # convert from rad to deg
+	
 	angles = [theta_one, theta_two, theta_three]
 	angle_array.append(angles)	
 	angles_df = pd.DataFrame(angle_array, columns = ['THETA1', 'THETA2', 'THETA3'])
@@ -292,20 +313,19 @@ def plot_points():
 
 
 # take_image()
-
 # find_pix('mountain_river.jpg')
 # find_pix('lana_bw.jpg')
-process_image('mountain_river.jpg')
+
+process_image('lana_hat.jpg')
 
 print "algorithm has ran its course"
 print
 
 print "now creating sql table"
+print
 connection = create_engine('mysql+mysqlconnector://root:passwd@localhost:3306/ECE_439')
 angles_df.to_sql(name = 'ANGLES', con = connection, if_exists = 'replace', index_label = 'ID')
 
-print
-print
 print "angles_df = ", angles_df
 print
 
