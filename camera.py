@@ -78,7 +78,7 @@ def process_image(process_input):
 		# image for plot_points() function; allows us to plot over original image
 		plot_image = image
 		cv2.imwrite('plot_image.jpg', plot_image)
-		cv2.imshow('Saved Original', image)
+		# cv2.imshow('Saved Original', image)
 		print "Move the trackbar to adjust the number of edges"
                 print "More edges means more detail, but a longer drawing time"
                 print "Once the image with edges is ready, hit ESC"
@@ -99,14 +99,16 @@ def process_image(process_input):
                 
                         # cv2.imshow('original', img)
                         cv2.imshow('canny', edges)
+                        montage = np.concatenate((edges, image), axis = 1)
+                        cv2. imshow('Canny Edge Detection vs. Original Image', montage)
+
                         k = cv2.waitKey(1) & 0xFF
                         
                         if k == 27:
                                 break
 
                 cv2.destroyAllWindows()		
-
-		cv2.imshow('Saved Edges', edges)
+		# cv2.imshow('Saved Edges', edges)
 	        height, width = edges.shape
 		print "resized image height = ", height
        		print "resized image width = ", width
@@ -231,7 +233,7 @@ def pix_to_ik(px, py, pen_state):
 	if ((math.pow(alpha, 2)) > 1.0):
                 print "pix_to_ik value out of bounds"
                 print "(cx, cy) = ", cartesian
-                print "setting theta_two to 0 degrees"
+                print "setting theta_two to 0.0 degrees"
                 print
                 theta_two = 0.0
         else:
@@ -265,6 +267,26 @@ def pix_to_ik(px, py, pen_state):
 	angles_df = pd.DataFrame(angle_array, columns = ['THETA1', 'THETA2', 'THETA3'])
 	
 	return angles_df
+
+
+
+
+
+##def trim_fat():
+##
+##        global angles_df
+##        global angle_array_plot
+##
+##        angle_array_plot = angle_array
+##
+##        for s in range(1, len(angle_array)-1):
+##                if ((angle_array[s][2] == 0.0) and (angle_array[s-1][2] == 0.0) and (angle_array[s+1][2] == 0.0)):                 
+##                        del angle_array[s]
+##
+##        print 
+##	angles_df = pd.DataFrame(angle_array, columns = ['THETA1', 'THETA2', 'THETA3'])
+##	return angles_df
+
 
 
 
