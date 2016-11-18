@@ -73,8 +73,9 @@ def process_image(process_input):
 		print
 		# dimensions should match ratio of 8.5" x 11" paper
 		# 352 x 272 
-		image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+		# image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 		image = cv2.resize(image, (352, 272))
+		image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 		# image for plot_points() function; allows us to plot over original image
 		plot_image = image
 		cv2.imwrite('plot_image.jpg', plot_image)
@@ -207,7 +208,6 @@ def pix_to_ik(px, py, pen_state):
 
 	global angle_array
 	global angles_df
-	global pix_list_df
 
         # x_offset was 2.0 before shifting the drawing surface over to
         # accomodate extending a2 (to allow for theta_three = 60.0)
@@ -254,9 +254,9 @@ def pix_to_ik(px, py, pen_state):
 
         # when the pen is down, theta_three is at 60 degrees
 	if (pen_state == True):
-		theta_three = 60.0
+		theta_three = 65.0
 	elif (pen_state == False):
-		theta_three = 0.0
+		theta_three = 50.0
 
 	theta_one = round(math.degrees(theta_one))  # convert from rad to deg
 	theta_one += 90.0                           # add +90 so we can stick with pos. integers
@@ -302,7 +302,7 @@ def plot_points():
 
 	image_2 = plt.imread('plot_image.jpg')
 	image_plot = plt.imshow(image_2, cmap = 'gray')
-	
+
 	for r in range(1, len(pix_list)-1, 2):
 		count += 1
 		r_float = float(r) # this necessary so progress != 0.0 every time
@@ -315,7 +315,7 @@ def plot_points():
 			print "\rprogress: ", progress, "%"
 			print
 
-		if theta_three == (math.pi / 3):
+		if theta_three == math.radians(65.0):
 			print "\rpen_down = true"
 			line_color = 'r'
 			alpha_val = 1.0
