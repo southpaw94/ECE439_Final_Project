@@ -12,12 +12,6 @@ from picamera import PiCamera
 from time import sleep
 from sqlalchemy import create_engine
 
-# ideas: resize image to something much smaller, with the same height/width ratio as either Pi camera
-# or the paper (8.5" x 11")
-# if we use a much smaller image, we will have less pixels and therefore less data, and the entire
-# process will take a shorter amount of time
-
-
 # global variables
 image = 0
 plot_image = 0
@@ -32,6 +26,8 @@ width = 0
 
 # universal setup for GPIO pin numbering
 GPIO.setmode(GPIO.BCM)
+
+
 
 
 def take_image():
@@ -51,24 +47,23 @@ def take_image():
 	image_captured = cv2.cvtColor(image_captured, cv2.COLOR_RGB2GRAY)
 	height_captured, width_captured = image_captured.shape
 	cv2.imwrite('image_captured.jpg', image_captured)
-	find_pix('image_captured.jpg')
+	process_image('image_captured.jpg')
 
-def find_pix(input_image):
 
-	# check if first time through to process image once, otherwise skip this step
+
+
+def process_image(process_input):
+
 	global image
-	global pix_list
-	global pen_down
 	global image_processed
-	global current_pix
 	global height, width
 	global plot_image
 
+	# check if first time through process_image, otherwise skip this step
 	if image_processed == False:
 		# image = saved image that we want processed/drawn
 		# if you want to draw a test picture, simply replace following line with "image = 'name_of_test_image.jpg'"
-		image = input_image
-		image = cv2.imread(image)
+		image = cv2.imread(process_input)
 		print 
 		print "image has been read"
 		print
@@ -79,21 +74,61 @@ def find_pix(input_image):
 		# dimensions should match ratio of 8.5" x 11" paper
 		# 352 x 272 
 		image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-		image = cv2.resize(image, (100, 77))
+		image = cv2.resize(image, (352, 272))
 		# image for plot_points() function; allows us to plot over original image
 		plot_image = image
 		cv2.imwrite('plot_image.jpg', plot_image)
 		cv2.imshow('Saved Original', image)
-		image = cv2.Canny(image, 150, 175)
-		cv2.imshow('Saved Edges', image)
-	        height, width = image.shape
+		
+                def nothing(x):
+                        pass
+
+                cv2.namedWindow('canny')
+                
+                cv2.createTrackbar('lower', 'canny', 0, 255, nothing)
+                cv2.createTrackbar('upper', 'canny', 0, 255, nothing)
+                
+                while(1):
+                        lower = cv2.getTrackbarPos('lower', 'canny')
+                        upper = cv2.getTrackbarPos('upper', 'canny')
+                        
+                        edges = cv2.Canny(image, lower, upper)
+                
+                        # cv2.imshow('original', img)
+                        cv2.imshow('canny', edges)
+                        k = cv2.waitKey(1) & 0xFF
+                        
+                        if k == 27:
+                                break
+
+                cv2.destroyAllWindows()		
+
+		cv2.imshow('Saved Edges', edges)
+	        height, width = edges.shape
 		print "resized image height = ", height
        		print "resized image width = ", width
 		print
-		image_processed = True	
+
+		image_processed = True
+                find_pix(edges)
+	
+
+
+
+
+def find_pix(input_image):
+
+	global image
+	global pix_list
+	global pen_down
+	global current_pix
+	global height, width
+	global plot_image
 
 	print "beginning to look for first white pixel"
 	print
+
+        image = input_image
 
 	for i in range(1, height):
 		for j in range(1, width):
@@ -130,6 +165,7 @@ def find_pix(input_image):
 	
 
 
+
 def follow_pix(k, l):
 
 	# (n, o) first time through is the current pixel location (first pixel in line)
@@ -156,9 +192,8 @@ def follow_pix(k, l):
 	pix_list.append(current_pix)
 	print
 	print
-	print "current_pix = ", current_pix
-	print
-	print
+
+
 
 
 #  function to convert a pixel coordinate into angles for the servos
@@ -259,8 +294,8 @@ def plot_points():
 # take_image()
 
 # find_pix('mountain_river.jpg')
-find_pix('twocircles.jpg')
 # find_pix('lana_bw.jpg')
+process_image('mountain_river.jpg')
 
 print "algorithm has ran its course"
 print
