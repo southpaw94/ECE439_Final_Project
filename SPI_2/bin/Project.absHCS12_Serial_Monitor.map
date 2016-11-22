@@ -1,5 +1,5 @@
 *** EVALUATION ***
-PROGRAM "C:\Users\Bryan Johnson\Documents\ece439_final_project\SPI_2\bin\Project.absHCS12_Serial_Monitor.abs"
+PROGRAM "C:\Users\mjestes\Documents\ECE439_Final_Project\SPI_2\bin\Project.absHCS12_Serial_Monitor.abs"
 
 *********************************************************************************************
 TARGET SECTION
@@ -29,8 +29,8 @@ Entry point: 0xC029 (_Startup)
 _startupData is allocated at 0xC03B and uses 6 Bytes
 extern struct _tagStartup {
   unsigned nofZeroOut     1
-  _Range   pZeroOut       0x1100     1
-  _Copy    *toCopyDownBeg 0xC581
+  _Range   pZeroOut       0x1100     2
+  _Copy    *toCopyDownBeg 0xC597
 } _startupData;
 
 *********************************************************************************************
@@ -39,8 +39,8 @@ Section Name                    Size  Type     From       To       Segment
 ---------------------------------------------------------------------------------------------
 .init                             59     R     0xC000     0xC03A   ROM_C000
 .startData                        10     R     0xC03B     0xC044   ROM_C000
-.text                            575     R     0xC045     0xC283   ROM_C000
-.copy                              2     R     0xC581     0xC582   ROM_C000
+.text                            562     R     0xC045     0xC276   ROM_C000
+.copy                              2     R     0xC597     0xC598   ROM_C000
 .stack                           256   R/W     0x1000     0x10FF   RAM
 .abs_section_8                     1   N/I        0x8        0x8   .absSeg0
 .abs_section_9                     1   N/I        0x9        0x9   .absSeg1
@@ -385,13 +385,13 @@ Section Name                    Size  Type     From       To       Segment
 .abs_section_2be                   2   N/I      0x2BE      0x2BF   .absSeg340
 .abs_section_ffe4                  2     R     0xFFE4     0xFFE5   .absSeg341
 .abs_section_ffd8                  2     R     0xFFD8     0xFFD9   .absSeg342
-.bss                               1   R/W     0x1100     0x1100   RAM
-RUNTIME                          765     R     0xC284     0xC580   ROM_C000
+.bss                               2   R/W     0x1100     0x1101   RAM
+RUNTIME                          800     R     0xC277     0xC596   ROM_C000
 .vectSeg343_vect                   2     R     0xFFFE     0xFFFF   .vectSeg343
 
 Summary of section sizes per section type:
-READ_ONLY (R):         589 (dec:     1417)
-READ_WRITE (R/W):      101 (dec:      257)
+READ_ONLY (R):         59F (dec:     1439)
+READ_WRITE (R/W):      102 (dec:      258)
 NO_INIT (N/I):         190 (dec:      400)
 
 *********************************************************************************************
@@ -444,19 +444,19 @@ MODULE:                 -- mc9s12dg256.c.o --
      _RTICTL                                     3B       1       1       0   .abs_section_3b
      _COPCTL                                     3C       1       1       0   .abs_section_3c
      _ARMCOP                                     3F       1       1       0   .abs_section_3f
-     _TIOS                                       40       1       1       1   .abs_section_40
+     _TIOS                                       40       1       1       0   .abs_section_40
      _CFORC                                      41       1       1       0   .abs_section_41
      _OC7M                                       42       1       1       0   .abs_section_42
      _OC7D                                       43       1       1       0   .abs_section_43
-     _TSCR1                                      46       1       1       1   .abs_section_46
+     _TSCR1                                      46       1       1       0   .abs_section_46
      _TTOV                                       47       1       1       0   .abs_section_47
-     _TCTL1                                      48       1       1       2   .abs_section_48
+     _TCTL1                                      48       1       1       0   .abs_section_48
      _TCTL2                                      49       1       1       0   .abs_section_49
      _TCTL3                                      4A       1       1       0   .abs_section_4a
      _TCTL4                                      4B       1       1       0   .abs_section_4b
-     _TIE                                        4C       1       1       1   .abs_section_4c
-     _TSCR2                                      4D       1       1       1   .abs_section_4d
-     _TFLG1                                      4E       1       1       2   .abs_section_4e
+     _TIE                                        4C       1       1       0   .abs_section_4c
+     _TSCR2                                      4D       1       1       0   .abs_section_4d
+     _TFLG1                                      4E       1       1       0   .abs_section_4e
      _TFLG2                                      4F       1       1       0   .abs_section_4f
      _PACTL                                      60       1       1       0   .abs_section_60
      _PAFLG                                      61       1       1       0   .abs_section_61
@@ -495,7 +495,7 @@ MODULE:                 -- mc9s12dg256.c.o --
      _SCI1DRH                                    D6       1       1       0   .abs_section_d6
      _SCI1DRL                                    D7       1       1       0   .abs_section_d7
      _SPI0CR1                                    D8       1       1       1   .abs_section_d8
-     _SPI0CR2                                    D9       1       1       0   .abs_section_d9
+     _SPI0CR2                                    D9       1       1       1   .abs_section_d9
      _SPI0BR                                     DA       1       1       0   .abs_section_da
      _SPI0SR                                     DB       1       1       1   .abs_section_db
      _SPI0DR                                     DD       1       1       2   .abs_section_dd
@@ -595,7 +595,7 @@ MODULE:                 -- mc9s12dg256.c.o --
      _PPST                                      245       1       1       0   .abs_section_245
      _PTS                                       248       1       1       0   .abs_section_248
      _PTIS                                      249       1       1       0   .abs_section_249
-     _DDRS                                      24A       1       1       0   .abs_section_24a
+     _DDRS                                      24A       1       1       1   .abs_section_24a
      _RDRS                                      24B       1       1       0   .abs_section_24b
      _PERS                                      24C       1       1       0   .abs_section_24c
      _PPSS                                      24D       1       1       0   .abs_section_24d
@@ -608,9 +608,9 @@ MODULE:                 -- mc9s12dg256.c.o --
      _PPSM                                      255       1       1       0   .abs_section_255
      _WOMM                                      256       1       1       0   .abs_section_256
      _MODRR                                     257       1       1       0   .abs_section_257
-     _PTP                                       258       1       1       4   .abs_section_258
+     _PTP                                       258       1       1       2   .abs_section_258
      _PTIP                                      259       1       1       0   .abs_section_259
-     _DDRP                                      25A       1       1       1   .abs_section_25a
+     _DDRP                                      25A       1       1       0   .abs_section_25a
      _RDRP                                      25B       1       1       0   .abs_section_25b
      _PERP                                      25C       1       1       0   .abs_section_25c
      _PPSP                                      25D       1       1       0   .abs_section_25d
@@ -689,16 +689,16 @@ MODULE:                 -- mc9s12dg256.c.o --
      _CAN4TXDSR7                                2BB       1       1       0   .abs_section_2bb
      _CAN4TXDLR                                 2BC       1       1       0   .abs_section_2bc
      _CAN4TXTBPR                                2BD       1       1       0   .abs_section_2bd
-     _PORTAB                                      0       2       2       2   .abs_section_0
-     _DDRAB                                       2       2       2       1   .abs_section_2
+     _PORTAB                                      0       2       2       1   .abs_section_0
+     _DDRAB                                       2       2       2       0   .abs_section_2
      _PARTID                                     1A       2       2       0   .abs_section_1a
-     _TCNT                                       44       2       2       1   .abs_section_44
+     _TCNT                                       44       2       2       0   .abs_section_44
      _TC0                                        50       2       2       0   .abs_section_50
      _TC1                                        52       2       2       0   .abs_section_52
      _TC2                                        54       2       2       0   .abs_section_54
      _TC3                                        56       2       2       0   .abs_section_56
      _TC4                                        58       2       2       0   .abs_section_58
-     _TC5                                        5A       2       2       3   .abs_section_5a
+     _TC5                                        5A       2       2       2   .abs_section_5a
      _TC6                                        5C       2       2       0   .abs_section_5c
      _TC7                                        5E       2       2       0   .abs_section_5e
      _PACN32                                     62       2       2       0   .abs_section_62
@@ -750,17 +750,18 @@ MODULE:                 -- mc9s12dg256.c.o --
      _CAN4TXTSR                                 2BE       2       2       0   .abs_section_2be
 MODULE:                 -- main.c.o --
 - PROCEDURES:
-     main                                      C045      33      51       1   .text       
-     timer_5_isr                               C078      71     113       1   .text       
-     spi0_isr                                  C0E9       B      11       1   .text       
-     pwm_init_16                               C0F4      45      69       1   .text       
-     pwm_write_16                              C139      BD     189       1   .text       
-     timer_5_enable                            C1F6      24      36       1   .text       
-     spi_enable                                C21A       4       4       1   .text       
-     seg_7                                     C21E      47      71       1   .text       
-     MSDelay                                   C265      1F      31       2   .text       
+     main                                      C045      19      25       1   .text       
+     timer_5_isr                               C05E      71     113       1   .text       
+     spi0_isr                                  C0CF      3F      63       1   .text       
+     pwm_init_16                               C10E      4B      75       1   .text       
+     pwm_write_0                               C159      45      69       2   .text       
+     pwm_write_1                               C19E      41      65       2   .text       
+     pwm_write_2                               C1DF      45      69       2   .text       
+     spi_enable                                C224       C      12       1   .text       
+     seg_7                                     C230      47      71       1   .text       
 - VARIABLES:
      seg_7_val                                 1100       1       1       2   .bss        
+     theta                                     1101       1       1       4   .bss        
      _Vector_13                                FFE4       2       2       0   .abs_section_ffe4
      _Vector_19                                FFD8       2       2       0   .abs_section_ffd8
 MODULE:                 -- Start12.c.o --
@@ -773,45 +774,48 @@ MODULE:                 -- Start12.c.o --
      __SEG_END_SSTACK                          1100       0       0       1               
 MODULE:                 -- FADD.C.o (ansis.lib) --
 - PROCEDURES:
-     F_ADDKL                                   C284      67     103       1   RUNTIME     
-     _FADD                                     C2EB      15      21       3   RUNTIME     
+     F_ADDKL                                   C277      67     103       1   RUNTIME     
+     _FADD                                     C2DE      15      21       3   RUNTIME     
 - VARIABLES:
 MODULE:                 -- FCONV.C.o (ansis.lib) --
 - PROCEDURES:
-     F_TOLONGK                                 C300      33      51       1   RUNTIME     
-     F_FRLONGK                                 C333      1F      31       1   RUNTIME     
-     _FUFLOAT                                  C352      12      18       3   RUNTIME     
-     _FSTRUNC                                  C364      11      17       3   RUNTIME     
+     F_TOLONGK                                 C2F3      33      51       1   RUNTIME     
+     F_FRLONGK                                 C326      1F      31       2   RUNTIME     
+     _FSFLOAT                                  C345      12      18       2   RUNTIME     
+     _FUFLOAT                                  C357      12      18       1   RUNTIME     
+     _FSTRUNC                                  C369      11      17       3   RUNTIME     
 - VARIABLES:
 MODULE:                 -- FMUL.C.o (ansis.lib) --
 - PROCEDURES:
-     F_DIVKL                                   C375      8E     142       1   RUNTIME     
-     F_MULKL                                   C403      58      88       1   RUNTIME     
-     _FMUL                                     C45B      14      20       3   RUNTIME     
-     _FDIV                                     C46F      1E      30       2   RUNTIME     
+     F_DIVKL                                   C37A      8E     142       1   RUNTIME     
+     F_MULKL                                   C408      58      88       1   RUNTIME     
+     _FMUL                                     C460      14      20       3   RUNTIME     
+     _FDIV                                     C474      1E      30       3   RUNTIME     
 - VARIABLES:
 MODULE:                 -- FREGS.C.o (ansis.lib) --
 - PROCEDURES:
-     F_PULK                                    C48D      15      21       4   RUNTIME     
-     F_PULL                                    C4A2      15      21       3   RUNTIME     
-     F_PSHK                                    C4B7      13      19       4   RUNTIME     
-     F_XGKL                                    C4CA      21      33       2   RUNTIME     
-     F_CLRK                                    C4EB       B      11       2   RUNTIME     
-     F_MAXK                                    C4F6       9       9       2   RUNTIME     
-     F_NORMK                                   C4FF      3E      62       3   RUNTIME     
+     F_PULK                                    C492      15      21       4   RUNTIME     
+     F_PULL                                    C4A7      15      21       3   RUNTIME     
+     F_PSHK                                    C4BC      13      19       5   RUNTIME     
+     F_XGKL                                    C4CF      21      33       2   RUNTIME     
+     F_CLRK                                    C4F0       B      11       2   RUNTIME     
+     F_MAXK                                    C4FB       9       9       2   RUNTIME     
+     F_NORMK                                   C504      3E      62       3   RUNTIME     
 - VARIABLES:
 MODULE:                 -- rtshc12.c.o (ansis.lib) --
 - PROCEDURES:
-     _BDIVMODU                                 C53D       A      10       3   RUNTIME     
-     _NEG_P                                    C547       F      15       1   RUNTIME     
-     _CASE_DIRECT_BYTE                         C556       5       5       1   RUNTIME     
-     _CASE_CHECKED_BYTE                        C55B      14      20       1   RUNTIME     
+     _BDIVMODU                                 C542       A      10       3   RUNTIME     
+     _NEG_P                                    C54C       F      15       1   RUNTIME     
+     _ILSEXT                                   C55B       7       7       2   RUNTIME     
+     _CASE_DIRECT_BYTE                         C562       5       5       1   RUNTIME     
+     _CASE_CHECKED_BYTE                        C567      14      20       2   RUNTIME     
 - VARIABLES:
 MODULE:                 -- VREGS.C.o (ansis.lib) --
 - PROCEDURES:
-     L_NEGK                                    C56F       7       7       1   RUNTIME     
-     L_PSHK                                    C576       8       8       1   RUNTIME     
-     UL_PULK                                   C57E       3       3       1   RUNTIME     
+     L_NEGK                                    C57B       7       7       2   RUNTIME     
+     L_PSHK                                    C582       8       8       1   RUNTIME     
+     UL_PULK                                   C58A       3       3       1   RUNTIME     
+     SL_PULK                                   C58D       A      10       1   RUNTIME     
 - VARIABLES:
 
 *********************************************************************************************
@@ -819,24 +823,24 @@ MODULE STATISTIC
   Name                                      Data   Code  Const
 ---------------------------------------------------------------------------------------------
   mc9s12dg256.c.o                            400      0      0
-  main.c.o                                     1    575      4
+  main.c.o                                     2    562      4
   Start12.c.o                                  0     59      0
   FADD.C.o (ansis.lib)                         0    124      0
-  FCONV.C.o (ansis.lib)                        0    117      0
+  FCONV.C.o (ansis.lib)                        0    135      0
   FMUL.C.o (ansis.lib)                         0    280      0
   FREGS.C.o (ansis.lib)                        0    176      0
-  rtshc12.c.o (ansis.lib)                      0     50      0
-  VREGS.C.o (ansis.lib)                        0     18      0
+  rtshc12.c.o (ansis.lib)                      0     57      0
+  VREGS.C.o (ansis.lib)                        0     28      0
   other                                      256     12      2
 
 *********************************************************************************************
 SECTION USE IN OBJECT-ALLOCATION SECTION
 ---------------------------------------------------------------------------------------------
 SECTION: ".text"
-  main timer_5_isr spi0_isr pwm_init_16 pwm_write_16 timer_5_enable spi_enable 
-  seg_7 MSDelay 
+  main timer_5_isr spi0_isr pwm_init_16 pwm_write_0 pwm_write_1 pwm_write_2 
+  spi_enable seg_7 
 SECTION: ".bss"
-  seg_7_val 
+  seg_7_val theta 
 SECTION: ".init"
   Init _Startup 
 SECTION: ".abs_section_8"
@@ -1526,16 +1530,17 @@ SECTION: ".abs_section_ffe4"
 SECTION: ".abs_section_ffd8"
   _Vector_19 
 SECTION: "RUNTIME"
-  F_ADDKL _FADD F_TOLONGK F_FRLONGK _FUFLOAT _FSTRUNC F_DIVKL F_MULKL _FMUL 
-  _FDIV F_PULK F_PULL F_PSHK F_XGKL F_CLRK F_MAXK F_NORMK _BDIVMODU _NEG_P 
-  _CASE_DIRECT_BYTE _CASE_CHECKED_BYTE L_NEGK L_PSHK UL_PULK 
+  F_ADDKL _FADD F_TOLONGK F_FRLONGK _FSFLOAT _FUFLOAT _FSTRUNC F_DIVKL F_MULKL 
+  _FMUL _FDIV F_PULK F_PULL F_PSHK F_XGKL F_CLRK F_MAXK F_NORMK _BDIVMODU 
+  _NEG_P _ILSEXT _CASE_DIRECT_BYTE _CASE_CHECKED_BYTE L_NEGK L_PSHK UL_PULK 
+  SL_PULK 
 
 *********************************************************************************************
 OBJECT LIST SORTED BY ADDRESS
      Name                                      Addr   hSize   dSize     Ref    Section   RLIB
 ---------------------------------------------------------------------------------------------
-     _PORTAB                                      0       2       2       2   .abs_section_0
-     _DDRAB                                       2       2       2       1   .abs_section_2
+     _PORTAB                                      0       2       2       1   .abs_section_0
+     _DDRAB                                       2       2       2       0   .abs_section_2
      _PORTE                                       8       1       1       0   .abs_section_8
      _DDRE                                        9       1       1       0   .abs_section_9
      _PEAR                                        A       1       1       0   .abs_section_a
@@ -1574,27 +1579,27 @@ OBJECT LIST SORTED BY ADDRESS
      _RTICTL                                     3B       1       1       0   .abs_section_3b
      _COPCTL                                     3C       1       1       0   .abs_section_3c
      _ARMCOP                                     3F       1       1       0   .abs_section_3f
-     _TIOS                                       40       1       1       1   .abs_section_40
+     _TIOS                                       40       1       1       0   .abs_section_40
      _CFORC                                      41       1       1       0   .abs_section_41
      _OC7M                                       42       1       1       0   .abs_section_42
      _OC7D                                       43       1       1       0   .abs_section_43
-     _TCNT                                       44       2       2       1   .abs_section_44
-     _TSCR1                                      46       1       1       1   .abs_section_46
+     _TCNT                                       44       2       2       0   .abs_section_44
+     _TSCR1                                      46       1       1       0   .abs_section_46
      _TTOV                                       47       1       1       0   .abs_section_47
-     _TCTL1                                      48       1       1       2   .abs_section_48
+     _TCTL1                                      48       1       1       0   .abs_section_48
      _TCTL2                                      49       1       1       0   .abs_section_49
      _TCTL3                                      4A       1       1       0   .abs_section_4a
      _TCTL4                                      4B       1       1       0   .abs_section_4b
-     _TIE                                        4C       1       1       1   .abs_section_4c
-     _TSCR2                                      4D       1       1       1   .abs_section_4d
-     _TFLG1                                      4E       1       1       2   .abs_section_4e
+     _TIE                                        4C       1       1       0   .abs_section_4c
+     _TSCR2                                      4D       1       1       0   .abs_section_4d
+     _TFLG1                                      4E       1       1       0   .abs_section_4e
      _TFLG2                                      4F       1       1       0   .abs_section_4f
      _TC0                                        50       2       2       0   .abs_section_50
      _TC1                                        52       2       2       0   .abs_section_52
      _TC2                                        54       2       2       0   .abs_section_54
      _TC3                                        56       2       2       0   .abs_section_56
      _TC4                                        58       2       2       0   .abs_section_58
-     _TC5                                        5A       2       2       3   .abs_section_5a
+     _TC5                                        5A       2       2       2   .abs_section_5a
      _TC6                                        5C       2       2       0   .abs_section_5c
      _TC7                                        5E       2       2       0   .abs_section_5e
      _PACTL                                      60       1       1       0   .abs_section_60
@@ -1667,7 +1672,7 @@ OBJECT LIST SORTED BY ADDRESS
      _SCI1DRH                                    D6       1       1       0   .abs_section_d6
      _SCI1DRL                                    D7       1       1       0   .abs_section_d7
      _SPI0CR1                                    D8       1       1       1   .abs_section_d8
-     _SPI0CR2                                    D9       1       1       0   .abs_section_d9
+     _SPI0CR2                                    D9       1       1       1   .abs_section_d9
      _SPI0BR                                     DA       1       1       0   .abs_section_da
      _SPI0SR                                     DB       1       1       1   .abs_section_db
      _SPI0DR                                     DD       1       1       2   .abs_section_dd
@@ -1779,7 +1784,7 @@ OBJECT LIST SORTED BY ADDRESS
      _PPST                                      245       1       1       0   .abs_section_245
      _PTS                                       248       1       1       0   .abs_section_248
      _PTIS                                      249       1       1       0   .abs_section_249
-     _DDRS                                      24A       1       1       0   .abs_section_24a
+     _DDRS                                      24A       1       1       1   .abs_section_24a
      _RDRS                                      24B       1       1       0   .abs_section_24b
      _PERS                                      24C       1       1       0   .abs_section_24c
      _PPSS                                      24D       1       1       0   .abs_section_24d
@@ -1792,9 +1797,9 @@ OBJECT LIST SORTED BY ADDRESS
      _PPSM                                      255       1       1       0   .abs_section_255
      _WOMM                                      256       1       1       0   .abs_section_256
      _MODRR                                     257       1       1       0   .abs_section_257
-     _PTP                                       258       1       1       4   .abs_section_258
+     _PTP                                       258       1       1       2   .abs_section_258
      _PTIP                                      259       1       1       0   .abs_section_259
-     _DDRP                                      25A       1       1       1   .abs_section_25a
+     _DDRP                                      25A       1       1       0   .abs_section_25a
      _RDRP                                      25B       1       1       0   .abs_section_25b
      _PERP                                      25C       1       1       0   .abs_section_25c
      _PPSP                                      25D       1       1       0   .abs_section_25d
@@ -1876,41 +1881,45 @@ OBJECT LIST SORTED BY ADDRESS
      _CAN4TXTBPR                                2BD       1       1       0   .abs_section_2bd
      _CAN4TXTSR                                 2BE       2       2       0   .abs_section_2be
      seg_7_val                                 1100       1       1       2   .bss        
+     theta                                     1101       1       1       4   .bss        
      Init                                      C000      29      41       1   .init       
      _Startup                                  C029      12      18       0   .init       
-     main                                      C045      33      51       1   .text       
-     timer_5_isr                               C078      71     113       1   .text       
-     spi0_isr                                  C0E9       B      11       1   .text       
-     pwm_init_16                               C0F4      45      69       1   .text       
-     pwm_write_16                              C139      BD     189       1   .text       
-     timer_5_enable                            C1F6      24      36       1   .text       
-     spi_enable                                C21A       4       4       1   .text       
-     seg_7                                     C21E      47      71       1   .text       
-     MSDelay                                   C265      1F      31       2   .text       
-     F_ADDKL                                   C284      67     103       1   RUNTIME     
-     _FADD                                     C2EB      15      21       3   RUNTIME     
-     F_TOLONGK                                 C300      33      51       1   RUNTIME     
-     F_FRLONGK                                 C333      1F      31       1   RUNTIME     
-     _FUFLOAT                                  C352      12      18       3   RUNTIME     
-     _FSTRUNC                                  C364      11      17       3   RUNTIME     
-     F_DIVKL                                   C375      8E     142       1   RUNTIME     
-     F_MULKL                                   C403      58      88       1   RUNTIME     
-     _FMUL                                     C45B      14      20       3   RUNTIME     
-     _FDIV                                     C46F      1E      30       2   RUNTIME     
-     F_PULK                                    C48D      15      21       4   RUNTIME     
-     F_PULL                                    C4A2      15      21       3   RUNTIME     
-     F_PSHK                                    C4B7      13      19       4   RUNTIME     
-     F_XGKL                                    C4CA      21      33       2   RUNTIME     
-     F_CLRK                                    C4EB       B      11       2   RUNTIME     
-     F_MAXK                                    C4F6       9       9       2   RUNTIME     
-     F_NORMK                                   C4FF      3E      62       3   RUNTIME     
-     _BDIVMODU                                 C53D       A      10       3   RUNTIME     
-     _NEG_P                                    C547       F      15       1   RUNTIME     
-     _CASE_DIRECT_BYTE                         C556       5       5       1   RUNTIME     
-     _CASE_CHECKED_BYTE                        C55B      14      20       1   RUNTIME     
-     L_NEGK                                    C56F       7       7       1   RUNTIME     
-     L_PSHK                                    C576       8       8       1   RUNTIME     
-     UL_PULK                                   C57E       3       3       1   RUNTIME     
+     main                                      C045      19      25       1   .text       
+     timer_5_isr                               C05E      71     113       1   .text       
+     spi0_isr                                  C0CF      3F      63       1   .text       
+     pwm_init_16                               C10E      4B      75       1   .text       
+     pwm_write_0                               C159      45      69       2   .text       
+     pwm_write_1                               C19E      41      65       2   .text       
+     pwm_write_2                               C1DF      45      69       2   .text       
+     spi_enable                                C224       C      12       1   .text       
+     seg_7                                     C230      47      71       1   .text       
+     F_ADDKL                                   C277      67     103       1   RUNTIME     
+     _FADD                                     C2DE      15      21       3   RUNTIME     
+     F_TOLONGK                                 C2F3      33      51       1   RUNTIME     
+     F_FRLONGK                                 C326      1F      31       2   RUNTIME     
+     _FSFLOAT                                  C345      12      18       2   RUNTIME     
+     _FUFLOAT                                  C357      12      18       1   RUNTIME     
+     _FSTRUNC                                  C369      11      17       3   RUNTIME     
+     F_DIVKL                                   C37A      8E     142       1   RUNTIME     
+     F_MULKL                                   C408      58      88       1   RUNTIME     
+     _FMUL                                     C460      14      20       3   RUNTIME     
+     _FDIV                                     C474      1E      30       3   RUNTIME     
+     F_PULK                                    C492      15      21       4   RUNTIME     
+     F_PULL                                    C4A7      15      21       3   RUNTIME     
+     F_PSHK                                    C4BC      13      19       5   RUNTIME     
+     F_XGKL                                    C4CF      21      33       2   RUNTIME     
+     F_CLRK                                    C4F0       B      11       2   RUNTIME     
+     F_MAXK                                    C4FB       9       9       2   RUNTIME     
+     F_NORMK                                   C504      3E      62       3   RUNTIME     
+     _BDIVMODU                                 C542       A      10       3   RUNTIME     
+     _NEG_P                                    C54C       F      15       1   RUNTIME     
+     _ILSEXT                                   C55B       7       7       2   RUNTIME     
+     _CASE_DIRECT_BYTE                         C562       5       5       1   RUNTIME     
+     _CASE_CHECKED_BYTE                        C567      14      20       2   RUNTIME     
+     L_NEGK                                    C57B       7       7       2   RUNTIME     
+     L_PSHK                                    C582       8       8       1   RUNTIME     
+     UL_PULK                                   C58A       3       3       1   RUNTIME     
+     SL_PULK                                   C58D       A      10       1   RUNTIME     
      _Vector_19                                FFD8       2       2       0   .abs_section_ffd8
      _Vector_13                                FFE4       2       2       0   .abs_section_ffe4
 
@@ -1919,21 +1928,19 @@ UNUSED-OBJECTS SECTION
 ---------------------------------------------------------------------------------------------
 NOT USED PROCEDURES
 main.c.o:
-  pwm_init pwm_write 
+  timer_5_enable MSDelay 
 FADD.C.o (ansis.lib):
   _FSUB _FINC _FDEC _FNEG _FABS 
 FCONV.C.o (ansis.lib):
-  _FSFLOAT _FUTRUNC 
+  _FUTRUNC 
 FREGS.C.o (ansis.lib):
   F_STAL F_TLK F_TKL F_CLRL 
 rtshc12.c.o (ansis.lib):
   _BSHL _BSHRS _BSHRU _BDIVMODS _ISHL _ISHRU _ISHRS _LSHL _LSHRU _LSHRS _LADD 
   _LSUB _LAND _LOR _LXOR _LCMP _LCMP_P _LCMP_PP _LNEG _LCOM _LINC _LDEC _LMUL 
-  _LMULU16x32 _LMULS16x32 _lDivMod _LDIVU _LDIVS _LMODU _LMODS _ILSEXT _COPY 
+  _LMULU16x32 _LMULS16x32 _lDivMod _LDIVU _LDIVS _LMODU _LMODS _COPY 
   _CASE_DIRECT _CASE_CHECKED _CASE_SEARCH _CASE_SEARCH_BYTE _CASE_SEARCH_8 
   _CASE_SEARCH_8_BYTE _FCALL _FPCMP 
-VREGS.C.o (ansis.lib):
-  SL_PULK 
 NOT USED VARIABLES
 main.c.o:
   buffer 
@@ -1943,7 +1950,7 @@ rtshc12.c.o (ansis.lib):
 *********************************************************************************************
 COPYDOWN SECTION
 ---------------------------------------------------------------------------------------------
-------- ROM-ADDRESS: 0xC581 ---- SIZE       2 ---
+------- ROM-ADDRESS: 0xC597 ---- SIZE       2 ---
 Filling bytes inserted
  0000
 
@@ -1952,22 +1959,25 @@ OBJECT-DEPENDENCIES SECTION
 ---------------------------------------------------------------------------------------------
 Init                      USES _startupData 
 _Startup                  USES __SEG_END_SSTACK Init main 
-main                      USES _DDRAB _DDRP _PTP _PORTAB spi_enable 
-                                timer_5_enable pwm_init_16 pwm_write_16 MSDelay 
+main                      USES pwm_init_16 pwm_write_0 pwm_write_1 pwm_write_2 
+                                spi_enable 
 timer_5_isr               USES _TC5 _PTP _CASE_DIRECT_BYTE _BDIVMODU seg_7 
                                 _PORTAB seg_7_val 
-spi0_isr                  USES _SPI0SR _SPI0DR seg_7_val 
+spi0_isr                  USES _SPI0SR _SPI0DR theta _CASE_CHECKED_BYTE 
+                                pwm_write_0 pwm_write_1 pwm_write_2 seg_7_val 
 pwm_init_16               USES _PWMCLK _PWMPOL _PWMPRCLK _PWMCTL _PWMCAE 
                                 _PWMPER01 _PWMPER23 _PWMPER45 _PWMDTY01 _PWMDTY23 
                                 _PWMDTY45 _PWME 
-pwm_write_16              USES _FUFLOAT _FDIV _FMUL _FADD _FSTRUNC _PWMDTY01 
-                                _PWMDTY23 _PWMDTY45 
-timer_5_enable            USES _TSCR1 _TSCR2 _TIOS _TCTL1 _TFLG1 _TCNT _TC5 
-                                _TIE 
-spi_enable                USES _SPI0CR1 
+pwm_write_0               USES _ILSEXT _FSFLOAT _FDIV _FMUL _FADD _FSTRUNC 
+                                _PWMDTY01 
+pwm_write_1               USES _FUFLOAT _FDIV _FMUL _FADD _FSTRUNC _PWMDTY23 
+pwm_write_2               USES _ILSEXT _FSFLOAT _FDIV _FMUL _FADD _FSTRUNC 
+                                _PWMDTY45 
+spi_enable                USES _SPI0CR1 _SPI0CR2 _DDRS 
 seg_7                     USES _CASE_CHECKED_BYTE 
 F_ADDKL                   USES F_XGKL F_NORMK 
 _FADD                     USES F_PULK F_PULL F_ADDKL F_PSHK 
+_FSFLOAT                  USES SL_PULK F_FRLONGK F_PSHK 
 _FUFLOAT                  USES UL_PULK F_FRLONGK F_PSHK 
 _FSTRUNC                  USES F_PULK F_TOLONGK L_PSHK 
 F_DIVKL                   USES F_MAXK F_NORMK 
@@ -1978,6 +1988,7 @@ F_MAXK                    USES F_CLRK
 F_NORMK                   USES F_MAXK 
 L_NEGK                    USES _NEG_P 
 L_PSHK                    USES L_NEGK 
+SL_PULK                   USES L_NEGK 
 _Vector_19                USES spi0_isr 
 _Vector_13                USES timer_5_isr 
 
@@ -1988,18 +1999,20 @@ DEPENDENCY TREE
  | 
  +- main                
  |  | 
- |  +- spi_enable          
- |  |    
- |  +- timer_5_enable      
- |  |    
  |  +- pwm_init_16         
  |  |    
- |  +- pwm_write_16        
+ |  +- pwm_write_0         
  |  |  | 
- |  |  +- _FUFLOAT            
+ |  |  +- _ILSEXT             
+ |  |  |    
+ |  |  +- _FSFLOAT            
  |  |  |  | 
- |  |  |  +- UL_PULK             
- |  |  |  |    
+ |  |  |  +- SL_PULK             
+ |  |  |  |  | 
+ |  |  |  |  +- L_NEGK              
+ |  |  |  |     | 
+ |  |  |  |     +- _NEG_P              
+ |  |  |  |          
  |  |  |  +- F_FRLONGK           
  |  |  |  |    
  |  |  |  +- F_PSHK              
@@ -2058,11 +2071,41 @@ DEPENDENCY TREE
  |  |     |    
  |  |     +- L_PSHK              
  |  |        | 
- |  |        +- L_NEGK              
- |  |           | 
- |  |           +- _NEG_P              
- |  |                
- |  +- MSDelay             
+ |  |        +- L_NEGK               (see above)
+ |  |           
+ |  +- pwm_write_1         
+ |  |  | 
+ |  |  +- _FUFLOAT            
+ |  |  |  | 
+ |  |  |  +- UL_PULK             
+ |  |  |  |    
+ |  |  |  +- F_FRLONGK            (see above)
+ |  |  |  |  
+ |  |  |  +- F_PSHK               (see above)
+ |  |  |     
+ |  |  +- _FDIV                (see above)
+ |  |  |  
+ |  |  +- _FMUL                (see above)
+ |  |  |  
+ |  |  +- _FADD                (see above)
+ |  |  |  
+ |  |  +- _FSTRUNC             (see above)
+ |  |     
+ |  +- pwm_write_2         
+ |  |  | 
+ |  |  +- _ILSEXT              (see above)
+ |  |  |  
+ |  |  +- _FSFLOAT             (see above)
+ |  |  |  
+ |  |  +- _FDIV                (see above)
+ |  |  |  
+ |  |  +- _FMUL                (see above)
+ |  |  |  
+ |  |  +- _FADD                (see above)
+ |  |  |  
+ |  |  +- _FSTRUNC             (see above)
+ |  |     
+ |  +- spi_enable          
  |       
  +- _Startup            
     | 
@@ -2085,13 +2128,21 @@ DEPENDENCY TREE
  _Vector_19          
  | 
  +- spi0_isr            
-      
+    | 
+    +- _CASE_CHECKED_BYTE   (see above)
+    |  
+    +- pwm_write_0          (see above)
+    |  
+    +- pwm_write_1          (see above)
+    |  
+    +- pwm_write_2          (see above)
+       
 *********************************************************************************************
 STATISTIC SECTION
 ---------------------------------------------------------------------------------------------
 
 ExeFile:
 --------
-Number of blocks to be downloaded: 8
-Total size of all blocks to be downloaded: 1417
+Number of blocks to be downloaded: 7
+Total size of all blocks to be downloaded: 1439
 

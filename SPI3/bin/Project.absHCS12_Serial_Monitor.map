@@ -1,5 +1,5 @@
 *** EVALUATION ***
-PROGRAM "C:\Users\mjestes\Documents\ECE439_Final_Project\SPI\bin\Project.absHCS12_Serial_Monitor.abs"
+PROGRAM "C:\Users\mjestes\Documents\ECE439_Final_Project\SPI3\bin\Project.absHCS12_Serial_Monitor.abs"
 
 *********************************************************************************************
 TARGET SECTION
@@ -1842,6 +1842,8 @@ OBJECT LIST SORTED BY ADDRESS
 UNUSED-OBJECTS SECTION
 ---------------------------------------------------------------------------------------------
 NOT USED PROCEDURES
+main.c.o:
+  pwm_init 
 rtshc12.c.o (ansis.lib):
   _BSHL _BSHRS _BSHRU _BDIVMODS _ISHL _ISHRU _ISHRS _LSHL _LSHRU _LSHRS _LADD 
   _LSUB _LAND _LOR _LXOR _LCMP _LCMP_P _LCMP_PP _LNEG _LCOM _LINC _LDEC _LMUL 
