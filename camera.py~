@@ -2,13 +2,9 @@
 import cv2
 import math
 import numpy as np
-import scipy as sp
-import matplotlib
-import matplotlib.pyplot as plt
-matplotlib.use("TkAgg")
 import pandas as pd
-# import RPi.GPIO as GPIO
-# from picamera import PiCamera
+import RPi.GPIO as GPIO
+from picamera import PiCamera
 from time import sleep
 from sqlalchemy import create_engine
 
@@ -19,8 +15,6 @@ from sqlalchemy import create_engine
 
 
 # global variables
-image = 0
-plot_image = 0
 angle_array = []
 pix_list = []
 pen_down = False
@@ -30,8 +24,8 @@ angles_df = pd.DataFrame()
 height = 0
 width = 0
 
-# universal setup for GPIO pin numbering
 GPIO.setmode(GPIO.BCM)
+# universal setup for GPIO pin numbering
 
 
 def take_image():
@@ -62,42 +56,35 @@ def find_pix(input_image):
 	global image_processed
 	global current_pix
 	global height, width
-	global plot_image
 
 	if image_processed == False:
 		# image = saved image that we want processed/drawn
 		# if you want to draw a test picture, simply replace following line with "image = 'name_of_test_image.jpg'"
 		image = input_image
 		image = cv2.imread(image)
-		print 
 		print "image has been read"
 		print
 		height_original, width_original, color_dimension = image.shape
 		print "original height = ", height_original
 		print "original width = ", width_original
 		print
-		# dimensions should match ratio of 8.5" x 11" paper
-		# 352 x 272 
-		image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+		# dimensions should match ratio of 8.5" x 11" paper  
 		image = cv2.resize(image, (352, 272))
-		# image for plot_points() function; allows us to plot over original image
-		plot_image = image
-		cv2.imwrite('plot_image.jpg', plot_image)
 		cv2.imshow('Saved Original', image)
-		image = cv2.Canny(image, 125, 175)
+		image = cv2.Canny(image, 150, 200)
 		cv2.imshow('Saved Edges', image)
 	        height, width = image.shape
-		print "resized image height = ", height
-       		print "resized image width = ", width
+		print "image height = ", height
+       		print "image width = ", width
 		print
 		image_processed = True	
 
 	print "beginning to look for first white pixel"
 	print
+
 	for i in range(1, height):
 		for j in range(1, width):
 			if image[i, j] != 0:
-				pen_down = False
 				current_pix = [i, j, pen_down]
 				pix_list.append(current_pix)
 				# delete already drawn pixels
@@ -112,7 +99,7 @@ def find_pix(input_image):
 						follow_pix(i, j)
 					else:
 						# if no white pixels in neighborhood, lift pen up until next pixel is found
-						pen_down = False
+						pen_down = False						
 
 	print "length of pix_list = ", len(pix_list)
 	print "found all pixels"
@@ -150,6 +137,7 @@ def follow_pix(k, l):
 					follow_pix(current_pix[0], current_pix[1])
 
 
+
 #  function to convert a pixel coordinate into angles for the servos
 #  on each joint
 def pix_to_ik(px, py, pen_state):
@@ -160,9 +148,9 @@ def pix_to_ik(px, py, pen_state):
 
 	# 1280 is width of image from pi cam, 232.72 is 2 inches (for offset) 
 	#  after multiplying by scalar
-	cx = ((px * 11.0) / width) + 2.0
+	cx = (11.0 / width) * (px + (2.0*(width/11.0)-px))
 	# 1024 is height of image from pi cam, -py is to flip axis to Cartesian	
-        cy = ((-py * 8.5) / height) + 8.5
+        cy = (8.5 / height) * (-py + height)
 	cartesian = [cx, cy]
 	# print "cartesian coords = ", cartesian
 	
@@ -191,7 +179,7 @@ def pix_to_ik(px, py, pen_state):
 		theta_three = 0.0
 
 	theta_one = round(math.degrees(theta_one))  # convert from rad to deg
-	theta_one += 90.0                           # add +90 so we can stick with uint's
+	theta_one += 90.0
 	theta_two = round(math.degrees(theta_two))  # convert from rad to deg
 	angles = [theta_one, theta_two, theta_three]
 	angle_array.append(angles)	
@@ -201,69 +189,16 @@ def pix_to_ik(px, py, pen_state):
 
 
 
-
-# function to plot points/lines being drawn as they are drawn in a scatterplot
-def plot_points():
-
-	color_array = []
-	count = 0
-	plt.axis([0, width, height, 0])
-	plt.ion()
-
-	image_2 = plt.imread('plot_image.jpg')
-	image_plot = plt.imshow(image_2, cmap = 'gray')
-	
-	for r in range(1, len(pix_list)-1, 2):
-		count += 1
-		r_float = float(r) # this necessary so progress != 0.0 every time
-		progress = 100.0 * (r_float / len(pix_list))
-		theta_three = math.radians(angle_array[r][2])
-
-		# keep track of and tell user progress so far 
-		if (count % 20 == 0):
-			print
-			print
-			print "progress :", round(progress, 1), "%"		
-			print
-			print
-
-		if theta_three == (math.pi/ 2):
-			line_color = 'r'
-			alpha_val = 1.0
-			plot_pen_state = True
-		else:
-			line_color = 'w--'
-			alpha_val = 0.2
-			plot_pen_state = False
-
-		print "pen state: ", plot_pen_state
-
-		lines = plt.plot([pix_list[r-1][1], pix_list[r][1]], [pix_list[r-1][0], pix_list[r][0]], line_color, alpha = alpha_val)
-		lines = plt.plot([pix_list[r][1], pix_list[r+1][1]], [pix_list[r][0], pix_list[r+1][0]], line_color, alpha = alpha_val) 
-		plt.draw()
-
-
-
-
-# take_image()
-# find_pix('mountain_river.jpg')
-find_pix('circle.png')
-
+take_image()
+# find_pix('lana_bw.jpg')
 print "algorithm has ran its course"
-print
-
 print "now creating sql table"
 connection = create_engine('mysql+mysqlconnector://root:passwd@localhost:3306/ECE_439')
 angles_df.to_sql(name = 'ANGLES', con = connection, if_exists = 'replace', index_label = 'ID')
-
 print
 print
 print "angles_df = ", angles_df
 print
-
-print "begin plotting what the robot is drawing"
-print
-plot_points()
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

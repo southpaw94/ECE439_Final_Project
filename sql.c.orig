@@ -16,8 +16,11 @@ void finish_with_error(MYSQL *con)
 
 int main(int argc, char **argv)
 {
-	int i;
+<<<<<<< HEAD
 	unsigned long iter = 0;
+=======
+	int i;
+>>>>>>> 0c878e84806608d573ae02ed736609d103827548
     if (!bcm2835_init())
     {
       printf("bcm2835_init failed. Are you running as root??\n");
@@ -35,7 +38,7 @@ int main(int argc, char **argv)
     bcm2835_spi_chipSelect(BCM2835_SPI_CS0);                      // The default
     bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);      // the default
 
-	printf("Press Enter to continue\n");
+	printf("Press any key to continue\n");
 	getchar();
 
 	/* initialized the SQL connection */
@@ -65,13 +68,19 @@ int main(int argc, char **argv)
 	MYSQL_ROW row;
 
 	while ((row = mysql_fetch_row(result))) {
+<<<<<<< HEAD
 		iter++;
 		printf("Sending packet %i\n", iter);
+		for (int i = 1; i < num_fields; i++) {
+=======
+
+		//for (i = num_fields - 1; i > 0; i--) {
 		for (i = 1; i < num_fields; i++) {
+>>>>>>> 0c878e84806608d573ae02ed736609d103827548
 			unsigned char send_data = (unsigned char) atoi(row[i]);
    			uint8_t read_data = bcm2835_spi_transfer((unsigned char) send_data);
    			printf("Sent to SPI: %u\n", send_data);
-			usleep(50000);
+			//sleep(5);
 			/* printf("%s ", row[i]); */
 		}
 		usleep(500000);
