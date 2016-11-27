@@ -3,8 +3,8 @@ import cv2
 import math
 import numpy as np
 import pandas as pd
-import RPi.GPIO as GPIO
-from picamera import PiCamera
+# import RPi.GPIO as GPIO
+# from picamera import PiCamera
 from time import sleep
 from sqlalchemy import create_engine
 
